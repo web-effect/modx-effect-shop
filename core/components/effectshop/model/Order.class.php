@@ -14,7 +14,7 @@ class Order
 	{
 		global $modx;
 		$this->modx = &$modx;
-		$this->modx->addPackage('shop', MODX_CORE_PATH . 'components/effectshop/model/');
+		$this->modx->addPackage('effectshop', MODX_CORE_PATH . 'components/effectshop/model/');
 		$this->cfg = Params::cfg();
 		$this->shk = $this->cfg['shk'] ?? false; //использовать ли Shopkeeper для заказов
 	}

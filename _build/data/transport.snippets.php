@@ -1,10 +1,12 @@
 <?php
 
 $sconfig=[
-    'effectpay.shk.hook'=>[
+    'shop'=>[
 		'description' => '',
     ],
 ];
+
+$name = 'effectshop';
 
 foreach($sconfig?:[] as $snippet=>$options){
     $snippet_file=$config['component']['core'].'elements/snippets/'.$snippet.'.php';
@@ -16,7 +18,7 @@ foreach($sconfig?:[] as $snippet=>$options){
             'snippet' => trim(str_replace(['<?php', '?>'], '', file_get_contents($snippet_file))),
 			'source' => 2,
 			'static' => true,
-			'static_file' => "components/effectpay/elements/snippets/$snippet.php",
+			'static_file' => "components/$name/elements/snippets/$snippet.php",
         ],
         'options'=>$config['data_options']['modSnippet'],
         'relations'=>[

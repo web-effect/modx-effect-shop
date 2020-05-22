@@ -1,7 +1,7 @@
 <?php
 $xpdo_meta_map['shop_order'] = array(
 	
-	'package' => 'shop',
+	'package' => 'effectshop',
 	'version' => null,
 	'table' => 'shop_orders',
 	'extends' => 'xPDOSimpleObject',

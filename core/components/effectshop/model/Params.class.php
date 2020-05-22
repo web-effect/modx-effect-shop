@@ -8,7 +8,7 @@ class Params
 	public function __construct(modX &$modx)
 	{
 		$this->modx = &$modx;
-		$this->modx->addPackage('shop', MODX_CORE_PATH . 'components/effectshop/model/');
+		$this->modx->addPackage('effectshop', MODX_CORE_PATH . 'components/effectshop/model/');
 		$this->cfg = require(__DIR__.'/../config.php');
 	}
 	
@@ -43,7 +43,7 @@ class Params
 	{
 		
 		global $modx;
-		$modx->addPackage('shop', MODX_CORE_PATH . 'components/effectshop/model/');
+		$modx->addPackage('effectshop', MODX_CORE_PATH . 'components/effectshop/model/');
 
 		$q = $modx->newQuery('shop_config');
 		$q->select(['setting', 'value']);
@@ -71,7 +71,7 @@ class Params
 	{
 
 		global $modx;
-		$modx->addPackage('shop', MODX_CORE_PATH . 'components/effectshop/model/');
+		$modx->addPackage('effectshop', MODX_CORE_PATH . 'components/effectshop/model/');
 
 		$obj = $modx->getObject('shop_config',[
 			'setting' => $data['key']
