@@ -17,7 +17,7 @@ export default{
 			
             const data = {
                 key: this.$route.params.tab,
-                value: JSON.stringify(this.sets[this.$route.params.tab])
+                value: this.sets[this.$route.params.tab]
 			}
 			console.log(data);
 

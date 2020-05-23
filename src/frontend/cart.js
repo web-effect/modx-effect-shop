@@ -41,9 +41,10 @@ const mixin = {
 					this.status = this.cart.qty ? 'default' : 'empty';
 
 					const event = new CustomEvent('shop-cart-' + action, {
-						detail: { order: this.order, data, response }
+						detail: { data, response }
 					});
 					document.dispatchEvent(event);
+					DEV && console.log(action, data, response);
                 });
         },
 

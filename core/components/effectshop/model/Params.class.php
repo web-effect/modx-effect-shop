@@ -5,13 +5,6 @@
  */
 class Params 
 {
-	public function __construct(modX &$modx)
-	{
-		$this->modx = &$modx;
-		$this->modx->addPackage('effectshop', MODX_CORE_PATH . 'components/effectshop/model/');
-		$this->cfg = require(__DIR__.'/../config.php');
-	}
-	
 
 	/**
 	 * 
@@ -77,8 +70,7 @@ class Params
 			'setting' => $data['key']
 		]);
 
-		$value = json_decode($data['value'], true);
-
+		$value = $data['value'];
 		if(!$obj || !is_array($value) || !count($value)) {
 			return [0, 'Не передано имя настройки или значение '.__LINE__];
 		} 

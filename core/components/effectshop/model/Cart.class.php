@@ -30,14 +30,14 @@ class Cart
 
 		switch ($action) {
 			case 'add':
-				$opts = !empty($_POST['options']) ? json_decode($_POST['options'], true) : '';
+				$opts = $_POST['options'] ?? [];
 				$output['product'] = $this->add((int)$_POST['id'], (int)$_POST['qty'], $opts);
 				break;
 			case 'remove':
-				$this->remove($_POST['index']);
+				$output['product'] = $this->remove((int)$_POST['index']);
 				break;
 			case 'qty':
-				$this->qty((int)$_POST['index'], (int)$_POST['qty']);
+				$output['product'] = $this->qty((int)$_POST['index'], (int)$_POST['qty']);
 				break;
 			default:	
 		}
@@ -57,8 +57,6 @@ class Cart
 		if (empty($product)) return false;
 
 		$product['price'] = $this->cleanPrice($product['price']);
-	
-		$product['name'] = htmlspecialchars($product['pagetitle']);
 		$product['qty'] = $this->cleanCount($qty) ?: 1;
 		$product['url'] = $this->modx->makeUrl($product['id'], '', '', 'full' );
 		
@@ -82,9 +80,12 @@ class Cart
 	 */
 	private function qty(int $index, $qty)
 	{
+		$product = [];
 		if ($this->cart['items'][$index]) {
+			$product = $this->cart['items'][$index];
 			$this->cart['items'][$index]['qty'] = $this->cleanCount($qty);
 		}
+		return $product;
 	}
 	
 
@@ -93,9 +94,12 @@ class Cart
 	 */
 	private function remove(int $index)
 	{
+		$product = [];
 		if ($this->cart['items'][$index]) {
+			$product = $this->cart['items'][$index];
 			array_splice($this->cart['items'], $index, 1);
 		}
+		return $product;
 	}
 
 
@@ -110,6 +114,8 @@ class Cart
 		$order['qty'] = 0;
 		
 		foreach($order['items'] as $k => &$item) {
+			$item['qty'] = (int)$item['qty'];
+			$item['price'] = (float)$item['price'];
 			$order['qty'] += $item['qty'];
 			$item['total_price'] = round(($item['price'] * $item['qty']), 2);
 			$order['price'] += $item['total_price'];
@@ -117,8 +123,8 @@ class Cart
 		unset($item);
 		
 		$order['price'] = round($order['price'], 2);
-		$order['discount'] = 0;
-		$order['delivery_price'] = 0;
+		$order['discount'] = $order['discount'] ?? 0;
+		$order['delivery_price'] = $order['delivery_price'] ?? 0;
 		$discount = $order['price'] * (((float)$order['discount']) / 100);
 		$order['total_price'] = $order['price'] + ((float)$order['delivery_price']) - $discount;
 

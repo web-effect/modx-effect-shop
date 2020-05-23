@@ -7,7 +7,7 @@ class CatalogSnippet extends Catalog
     {
         switch ($action) {
             case 'renderCatalog':
-                $filter = json_decode($_POST['filter'] ?? [], true);
+                $filter = $_POST['filter'] ?? [];
                 return self::getProductsSnippet($filter, true);
         }
     }

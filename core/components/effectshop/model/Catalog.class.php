@@ -286,7 +286,8 @@ class Catalog
 		$img_path = $source_properties['basePath']['value'];
 
 		foreach ($rows as &$item) {
-			$item['pagetitle'] = htmlspecialchars($item['pagetitle']);
+			$item['name'] = htmlspecialchars($item['pagetitle']);
+			unset($item['pagetitle']);
 			$item['_price'] = self::numFormat($item['price']);
 			if (!empty($item['image'])) {
 				$item['image'] = "$img_path{$item['image']}";

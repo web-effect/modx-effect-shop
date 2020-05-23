@@ -11,27 +11,30 @@ export default {
 			{ name: 'payment', label: 'Оплата' },
 			{ name: 'delivery', label: 'Доставка' },
 			{ name: 'total_price', label: 'Сумма', numeric: true },
-			{ name: 'contacts.email', label: 'Email' },
+			{ name: 'contacts__email', label: 'Email' },
 		],
-		loading: false,
-		total: 0,
+		loading: true,
+
 		page: 1,
+		total: 0,
+		limit: 25,
+
 		filter: {
-			sortField: 'id',
+			page: 1,
+			sortField: 'date',
 			sortDir: 'DESC',
 			dates: [],
 		},		
 	}},
 	
 	methods: {
-		
 		paginate(val) {
             this.addFilter('page', val);
 			window.scrollTo({ top: 0, behavior: "smooth" });
         },
 
         sorting(val) {
-			this.filter.sortDir = this.filter.sortDir=='ASC' ? 'DESC' : 'ASC';
+			this.filter.sortDir = this.filter.sortDir == 'ASC' ? 'DESC' : 'ASC';
             this.filter.sortField = val;
             this.addFilter();
         },
@@ -43,7 +46,7 @@ export default {
             if (name !== 'page') this.filter.page = 1;
 
             this.timer = setTimeout(() => {
-                this.request();
+                this.request(1);
             }, lazy ? 500 : 0);
         },
 
@@ -62,18 +65,17 @@ export default {
 			this.$router.replace({ path: '/list', query: filter });
 		},
 
-		request(callback) {
+		request(toUrl) {
 			const filter = this.cleanFilter();
 			this.loading = true;
-
 			this.$http('order', 'getAll', filter)
 				.then((data) => {
 					this.rows = data.rows || [];
 					this.total = data.total;
+					this.limit = data.limit;
 					this.loading = false;
-					this.toUrl(filter);
+					toUrl && this.toUrl(filter);
 					console.log(data);
-					if(callback) callback();
 				});
 		},
 		
@@ -92,18 +94,9 @@ export default {
 			for (let q in this.$route.query) {
 				this.filter[q] = q == 'dates' ? this.$route.query[q].split(',') : this.$route.query[q];
 			}
+			if (this.$route.query.page) this.page = +this.$route.query.page;
 		}
-
-		this.loading = true;
-		this.$http('order', 'getAll')
-			.then((data) => {
-				this.rows = data.rows || [];
-				this.total = data.total;
-				this.loading = false;
-				console.log(data);
-			});
-
-		
+		this.request();
 	}
 	
 };

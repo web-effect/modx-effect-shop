@@ -24,7 +24,7 @@
 							</div>
 							<div>
 								<b-button  @click="statusModal=true">Сменить статус</b-button>
-								<b-button  @click="statusModal=true" icon-left="delete-forever"></b-button>
+								<b-button :loading="saveLoading" native-type="submit" type="is-primary">Сохранить изменения</b-button>
 							</div>
 							
 						</div>
@@ -102,11 +102,11 @@
 				<template slot-scope="props">
 				
 					<b-table-column field="name" label="Название" :class="{opacity: !productsIds.includes(props.row.id)}">
-						<a target="_blank" :href="props.row.url">{{ props.row.pagetitle }}</a>
+						<a target="_blank" :href="props.row.url">{{ props.row.name }}</a>
 					</b-table-column>
 					
 					<b-table-column field="price" label="Цена, руб." numeric>
-						{{ (props.row.price).toFixed(2) }}
+						{{ props.row.price | price }}
 					</b-table-column>
 					
 					<b-table-column field="qty" label="Кол-во" width="180" centered>
@@ -152,10 +152,7 @@
 			-->
 		</div><!-- box -->
 		
-	
-		<b-button :loading="saveLoading" native-type="submit" type="is-primary">Сохранить изменения</b-button>
-	
-		
+
 	</form>
 	
 	<div class="level"></div>
@@ -178,11 +175,6 @@
 				<b-table-column field="comment" label="Комментарий">
 					{{ props.row.comment }}
 				</b-table-column>
-				
-				<b-table-column field="file" label="Файл">
-					<a v-if="props.row.file" target="_blank" :title="props.row.file" :href="props.row.file">Ссылка</a>
-				</b-table-column>
-				
 				
 			</template>
 		</b-table>

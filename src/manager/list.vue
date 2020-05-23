@@ -63,20 +63,20 @@
 						</b-select>
 					</th>
 					<th>
-						<b-select @input="addFilter('status', $event)" v-model="filter.payment">
+						<b-select @input="addFilter('payment', $event)" v-model="filter.payment">
 							<option></option>
 							<option v-for="i,k in sets.payment" :value="i.key">{{ i.label }}</option>
 						</b-select>
 					</th>
 					<th>
-						<b-select @input="addFilter('status', $event)" v-model="filter.delivery">
+						<b-select @input="addFilter('delivery', $event)" v-model="filter.delivery">
 							<option></option>
 							<option v-for="i,k in sets.delivery" :value="i.key">{{ i.label }}</option>
 						</b-select>
 					</th>
 					<th></th>
 					<th>
-						<b-input @input="addFilter('status', $event, 1)" v-model.trim="filter.fullname"></b-input>
+						<b-input @input="addFilter('contacts__email', $event, 1)" v-model.trim="filter['contacts__email']"></b-input>
 					</th>
 				</tr>
 
@@ -118,9 +118,15 @@
 					</td>
 
 					<td :data-label="columns[5].label">
-						<template v-if="row.contacts">
-							{{ row.contacts.email }}
-						</template>
+						<div class="level top">
+							<template v-if="row.contacts">
+								{{ row.contacts.email }}
+							</template>
+							<div v-if="row.userid > 0">
+								<b-icon icon="account" size="is-small"></b-icon>
+								{{ row.userid }}
+							</div>
+						</div>
 					</td>
 
 				</tr>
@@ -143,7 +149,7 @@
 			@change="paginate($event)"
 			:total="total"
 			:current.sync="page"
-			per-page="25"
+			:per-page="limit"
 		></b-pagination>
 	</div>
 
