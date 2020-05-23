@@ -6,7 +6,7 @@
 //var_dump($modx->map['modPluginEvent']);
 $pconfig=[
     'events'=>[
-        //'PayCallback'=>['groupname'=>'Effect Pay']
+        'ShopCartAfterProcess' => ['groupname' => 'Shop']
     ],
     'plugins'=>[
         /*'Sample'=>[

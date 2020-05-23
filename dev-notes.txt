@@ -1,0 +1,2 @@
+cd ~/_dev/modx-effect-shop
+git submodule update --remote

@@ -1,9 +1,18 @@
 <?php
 
 $config['data_options']=[
+    'shop_config'=>[
+        'search_by'=>['setting'],
+        'update'=>false,
+        'preserve'=>true
+    ],
     'modSystemSetting'=>[
         'search_by'=>['key'],
         'update'=>false,
+        'preserve'=>true
+    ],
+    'modMenu'=>[
+        'search_by'=>['text'],
         'preserve'=>true
     ],
     'modCategory'=>[
@@ -25,6 +34,9 @@ $config['data_options']=[
         'preserve'=>true
     ],
     'modSnippet'=>[
+        'search_by'=>['name'],
+    ],
+    'modChunk'=>[
         'search_by'=>['name'],
     ],
 ];
