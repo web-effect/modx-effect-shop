@@ -41,12 +41,12 @@ class Catalog
 
 
     /**
-     * Получить все поля товара (не готово)
+     * Получить все поля товара
      */
     public static function getOneFull(int $id)
     {
         $cache = Shop::fromCache("fullproduct", $id, 'resource');
-        if ($cache) return $cache;
+        if ($cache) return self::countSavedProducts($cache);
 
         global $modx;
         $resFields = array_keys($modx->getFields('modResource'));
@@ -83,7 +83,7 @@ class Catalog
 
         $products = self::processProducts([$res]);
         Shop::toCache($products[0], "fullproduct", $id, 'resource');
-        return $products[0];
+        return self::countSavedProducts($products[0]);
     }
 
 
@@ -94,7 +94,7 @@ class Catalog
     {
         $cacheKey = 'products_' . ($pagination ? 'pg' : 'nopg');
         $cache = Shop::fromCache($cacheKey, $props, 'resource');
-        if ($cache) return $cache;
+        if ($cache) return self::countSavedProducts($cache);
 
 
         $time_start = microtime(true);
@@ -265,7 +265,7 @@ class Catalog
             Shop::toCache($out, $cacheKey, $props, 'resource');
         }
         
-        return $out;
+        return self::countSavedProducts($out);
     }
 
 
@@ -325,6 +325,33 @@ class Catalog
 
         return $rows;
     }
+
+
+    /**
+     * 
+     */
+    private static function countSavedProducts(array $input)
+    {
+        $rows = $input['rows'] ?? $input;
+        
+        $cart = $_SESSION['shop_cart']['items'] ?? [];
+        $cartIds = array_column($cart , 'id');
+
+        foreach ($rows as &$item) {
+            $index = array_search($item['id'], $cartIds);
+            $cartQty = $index !== false && isset($cart[$index]) ? $cart[$index]['qty'] : 0;
+            $item['inCart'] = $cartQty;
+        }
+        unset($item);
+
+        if (empty($input['rows'])) {
+            return $rows;
+        } else {
+            $input['rows'] = $rows;
+            return $input;
+        }
+    }
+
 
 
     /**

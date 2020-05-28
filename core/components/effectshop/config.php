@@ -1,13 +1,13 @@
 <?php
 return [
 	// режим совместимости с Shopkeeper 3
-	'shk' => false, 
+	'shk' => true, 
 	
 	// параметры обрезки картинки товара
 	'thumb' => 'w=110&h=110', 
 
 	// поля, которые нужно получить в корзине и в каталоге (помимо стандартных)
-	'product_get_fields' => ['brand', 'price_vip'],
+	'product_get_fields' => ['introtext'],
 
 	// шаблоны товара
 	'product_tmpls' => [7], 

@@ -67,7 +67,7 @@
 						</td>
 					</tr>
 					
-			
+					<!-- 
 					<tr>
 						<td colspan="4" style="text-align: right; padding:5px 10px; border:1px solid #d6d6d6;">
 							Доставка
@@ -84,7 +84,7 @@
 							{$order.payment_name ?: $order.payment}
 						</td>
 					</tr>
-				
+					 -->
 				
 				</tfoot>
 				
@@ -100,7 +100,7 @@
 				<tbody>
 					{foreach $order.contacts as $k=>$v}
 						<tr>
-							<td {$css_td}>{$k}</td>
+							<td {$css_td}>{$order.contact_fields[$k]}</td>
 							<td {$css_td}>{$v}</td>
 						</tr>
 					{/foreach}

@@ -88,6 +88,7 @@ class Order
 
         $pay_error = false;
         
+        /*
         if ($order['payment'] == 'sberbank') {
             $pay = Pay::sberbank($order);
             if (!$pay[0]) {
@@ -101,8 +102,7 @@ class Order
 
             $order['status'] = $pay_error ? self::ST_PAY_ERROR : self::ST_PAY_WAIT;
             $this->saveOrder($order, $order['id']);		
-        }
-        
+        }*/
         
 
         $Mail = new Mail($this->modx);
@@ -150,7 +150,7 @@ class Order
         }
 
         if ($this->shk) {
-            $Shopkeeper = new Shopkeeper();
+            $Shopkeeper = new ESShopkeeper();
             if ($id) {
                 $new_id = $Shopkeeper->updateOrder($id, $order);
             } else {
@@ -214,7 +214,7 @@ class Order
     public function getOne($id)
     {
         if ($this->shk) {
-            $Shopkeeper = new Shopkeeper();
+            $Shopkeeper = new ESShopkeeper();
             return $Shopkeeper->getOrder($id);
         }
         

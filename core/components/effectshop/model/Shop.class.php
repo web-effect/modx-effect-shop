@@ -11,7 +11,7 @@ class Shop
 		if (!$cfg['shk']) {
 			$settings = Params::getSettings();
 		} else {
-			$settings = Shopkeeper::getSettings();
+			$settings = ESShopkeeper::getSettings();
 		}
         
 

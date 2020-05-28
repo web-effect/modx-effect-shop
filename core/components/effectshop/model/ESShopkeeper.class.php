@@ -2,7 +2,7 @@
 /**
  * Для совместимости заказов с Shopkeeper
  */
-class Shopkeeper
+class ESShopkeeper
 {
 
 	public function __construct()
@@ -159,7 +159,7 @@ class Shopkeeper
 				$insert_data = array(
 					'p_id' => $p_data['id'],
 					'order_id' => $order->id,
-					'name' => $p_data['pagetitle'],
+					'name' => $p_data['name'],
 					'price' => $p_data['price'],
 					'count' => $p_data['qty'],
 					'class_name' => 'modResource',
@@ -242,7 +242,6 @@ class Shopkeeper
 			$purchase = array_combine($_keys,array_values($purchase));
 			$purchase['id'] = $purchase['p_id'];
 			$purchase['qty'] = $purchase['count'];
-			$purchase['pagetitle'] = $purchase['name'];
 			
 			$opts = json_decode($purchase['options'],true) ?: [];
 			$purchase['options'] = [];
