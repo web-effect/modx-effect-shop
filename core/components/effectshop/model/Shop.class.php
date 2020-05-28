@@ -15,9 +15,7 @@ class Shop
 		}
         
 
-
         switch ($action) {
-
             case 'load':
                 $Cart = new Cart();
                 $Cart->cropImages();

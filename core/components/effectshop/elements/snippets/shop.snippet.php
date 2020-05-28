@@ -1,7 +1,7 @@
 <?php
 require MODX_CORE_PATH . 'components/effectshop/autoload.php';
 
-$id = $modx->resource->get('id');
+$id = $id ?? $modx->resource->get('id');
 
 switch ($action) {
 	case 'getProducts':
@@ -18,6 +18,11 @@ switch ($action) {
 
 	case 'getFilters':
 		$response = CatalogSnippet::getFilters($id);
+		break;
+
+	case 'getOneFull':
+		$response = CatalogSnippet::getOneFull($id);
+		break;
 }
 
 return $response;

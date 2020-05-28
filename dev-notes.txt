@@ -1,2 +1,8 @@
 cd ~/_dev/modx-effect-shop
+
+Обновить субмодули
 git submodule update --remote
+
+Сборка пакета
+cd ~/_dev/modx-effect-shop/_build
+php7.2 build.transport.php

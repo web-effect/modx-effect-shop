@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Для работы сниппета shop
+ * Название класса не очень удачное, но другого не придумал
+ */
+
 class CatalogSnippet extends Catalog
 {
 
@@ -208,14 +213,12 @@ class CatalogSnippet extends Catalog
 		foreach ($rows_tvs as $k => $row) {
 			$values = explode('||', $row['value']);
 			foreach ($values as $v) {
-                // todo поправить, чтоб значения могли браться из возможных параметров
                 $elValues = [];
 				$els = explode('||', $row['elements']);
                 foreach ($els as $el) {
                     $tmp = explode('==', $el);
                     $elValues[$tmp[1]] = $tmp[0];
                 }
-
 				$out['filters'][$row['name']]['values'][] = [
 					'label' => $dicts_titles[(int)$v] ?? $elValues[$v] ?? $v,
 					'value' => $v
