@@ -31,12 +31,18 @@ Vue.prototype.$shop = new Vue({
             for (let property in obj) {
                 if (obj.hasOwnProperty(property) && obj[property]) {
                     formKey = namespace ? namespace + '[' + property + ']' : property;
+                    // Пустой массив
+                    if (Array.isArray(obj[property]) && !obj[property].length) {
+                        fd.append(formKey, obj[property]);
+                    }
                     if (typeof obj[property] === 'object' && !(obj[property] instanceof File)) {
                         this.toFormData(obj[property], fd, formKey);
                     } else { // if it's a string or a File object
                         fd.append(formKey, obj[property]);
                     }
+         
                 }
+                
             }
             return fd;
         },

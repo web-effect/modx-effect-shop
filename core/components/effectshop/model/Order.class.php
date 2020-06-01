@@ -1,4 +1,6 @@
 <?php
+namespace Shop;
+
 /**
  * Создание и получение заказов
  */
@@ -150,7 +152,7 @@ class Order
         }
 
         if ($this->shk) {
-            $Shopkeeper = new ESShopkeeper();
+            $Shopkeeper = new Shk();
             if ($id) {
                 $new_id = $Shopkeeper->updateOrder($id, $order);
             } else {
@@ -214,7 +216,7 @@ class Order
     public function getOne($id)
     {
         if ($this->shk) {
-            $Shopkeeper = new ESShopkeeper();
+            $Shopkeeper = new Shk();
             return $Shopkeeper->getOrder($id);
         }
         
@@ -296,7 +298,7 @@ class Order
 
         $q->prepare();
         $q->stmt->execute();
-        $q_result = $q->stmt->fetchAll(PDO::FETCH_ASSOC);
+        $q_result = $q->stmt->fetchAll(\PDO::FETCH_ASSOC);
         
         foreach ($q_result as $key => $res) {
             $fields = $res;

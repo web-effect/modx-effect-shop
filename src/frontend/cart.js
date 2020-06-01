@@ -40,8 +40,8 @@ const mixin = {
                     this.loading.cart = false;
                     this.status = this.cart.qty ? 'default' : 'empty';
 
-                    const event = new CustomEvent('shop-cart-' + action, {
-                        detail: { data, response }
+                    const event = new CustomEvent('shop-cart-request', {
+                        detail: { action, data, response }
                     });
                     document.dispatchEvent(event);
                     DEV && console.log(action, data, response);
@@ -54,11 +54,19 @@ const mixin = {
             }
         },
         
-        qty(index, plus) {
+        qty(index, plus, min = 1) {
             const qty = +this.cart.items[index].qty + plus;
-            if (!qty) return;
+            if (qty < min) return;
+            if (qty === 0) {
+                this.remove(index);
+                return;
+            }
             this.cart.items[index].qty = qty;
             this.request('qty', { index, qty });
+        },
+
+        change(index, params) {
+            this.request('change', { index, params });
         },
         
         indexById(id) {
@@ -89,8 +97,33 @@ const mixin = {
                     });
                     document.dispatchEvent(event);
                 });
-        }
+        },
 
+        getProductForm(el) {
+            const out = {};
+            const form = el.tagName == 'FORM' ? el : el.closest('form');
+            if (!form) return false;
+
+            out.form = form;
+            out.button = form.querySelector('.shop-item-button');
+
+            out.id_el = form.querySelector('[name=id]');
+            out.qty_el = form.querySelector('[name=qty]');
+            out.opt_els = form.querySelectorAll('[name^=opt-]') || [];
+            out.adds_els = form.querySelectorAll('[name=adds]:checked');
+
+            out.id = +out.id_el.value;
+            out.qty = out.qty_el ? +out.qty_el.value : 1;
+
+            out.params = { opts: {} };
+            out.params.adds = Array.from(out.adds_els).map(cb => cb.value);
+
+            out.opt_els.forEach((opt) => {
+                if (opt.value) out.params.opts[opt.name] = opt.value;
+            })
+
+            return out;
+        }
     },
     
     computed: {
@@ -140,6 +173,10 @@ const ShopCartApp = new Vue({
                     }
                 }
             }
+            const event = new CustomEvent('shop-cart-load', {
+                detail: { response: data }
+            });
+            document.dispatchEvent(event);
         });
         
         this.favoritesCount = savedProductsFromCookie('favorites').length;
@@ -169,8 +206,10 @@ appNodes.forEach((el) => {
 
 
 
-/* Добавление в корзину */
-
+/**
+ * Добавление в корзину
+ * @todo getProductForm()
+ */
 document.addEventListener('submit', (e) => {
     if (!e.target.matches('.shop-item form')) return;
     e.preventDefault();
@@ -182,15 +221,16 @@ document.addEventListener('submit', (e) => {
           id = +id_el.value,
           qty = qty_el ? +qty_el.value : 1,
           opt_els = form.querySelectorAll('[name^=opt-]') || [],
-          options = {};
+          adds_els = form.querySelectorAll('[name=adds]:checked'),
+          params = { opts: {} };
+
+    params.adds =  Array.from(adds_els).map(cb => cb.value);
 
     opt_els.forEach((opt) => {
-        if (opt.value) options[opt.name] = opt.value;
+        if (opt.value) params.opts[opt.name] = opt.value;
     })
-
     form.classList.remove("is-error");
-
-    if (Object.values(options).length !== opt_els.length) {
+    if (Object.values(params.opts).length !== opt_els.length) {
         form.classList.add("is-error");
         console.log('не выбраны опции')
         return;
@@ -198,7 +238,7 @@ document.addEventListener('submit', (e) => {
 
     button && button.classList.add("is-loading");
     
-    ShopCartApp.request('add', { id, qty, options }, () => {
+    ShopCartApp.request('add', { id, qty, params }, () => {
         button && button.classList.remove("is-loading");
         button && button.classList.add("is-added");
         form.classList.add("is-added");
@@ -209,7 +249,6 @@ document.addEventListener('submit', (e) => {
 
 
 /* Кнопки плюс-минус */
-
 document.addEventListener('click', (e) => {
     const btn = e.target.closest('.shop-item-plus, .shop-item-minus');
     if (!btn) return;
@@ -218,7 +257,9 @@ document.addEventListener('click', (e) => {
     const input = e.target.closest('.shop-item').querySelector('[name=qty]'),
           x = btn.classList.contains('shop-item-minus') ? -1 : 1,
           val = (parseInt(input.value) || 0) + x;
-    input.value = val > 0 ? val : 1;
+
+    let min = input.hasAttribute('min') ? +input.min : 1;
+    input.value = val > (min - 1) ? val : min;
 
     const event = new Event("change");
     input.dispatchEvent(event);
@@ -232,7 +273,6 @@ document.addEventListener('blur', (e) => {
 
 
 /* добавить в избранное или к сравнению */
-
 document.addEventListener('click', (e) => {
     const btn = e.target.closest('.shop-item-to-favorites');
     if (!btn) return;
@@ -244,13 +284,6 @@ document.addEventListener('click', (e) => {
           id = idEl.value,
           catalogDataEl = document.querySelector('.shop-catalog-data'),
           pageType = catalogDataEl ? catalogDataEl.dataset.pageType : '';
-
-
-    // колонка товара для удаления на стр. избранного или сравнения
-    // var productWrapper = $(this).closest('[class*=col-]');
-    // секция на стр. избранного или сравнения
-    // var sectionWrapper = $(this).closest('.products-' + name);
-
 
     var ids = savedProductsFromCookie(name),
         index = ids.indexOf(id);

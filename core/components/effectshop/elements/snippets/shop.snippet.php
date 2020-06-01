@@ -9,19 +9,19 @@ switch ($action) {
 			// Раздел каталога
 			$scriptProperties['id'] = $id;
 			$_SESSION['shop_products_snippet'] = $scriptProperties;
-			$response = CatalogSnippet::getProductsSnippet($_GET, true);
+			$response = Shop\CatalogSnippet::getProductsSnippet($_GET, true);
 		} else {
 			// Простой режим
-			$response = CatalogSnippet::getProductsSnippet($scriptProperties);
+			$response = Shop\CatalogSnippet::getProductsSnippet($scriptProperties);
 		}
 		break;
 
 	case 'getFilters':
-		$response = CatalogSnippet::getFilters($id);
+		$response = Shop\CatalogSnippet::getFilters($id);
 		break;
 
 	case 'getOneFull':
-		$response = CatalogSnippet::getOneFull($id);
+		$response = Shop\CatalogSnippet::getOneFull($id);
 		break;
 }
 

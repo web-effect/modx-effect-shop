@@ -1,4 +1,5 @@
 <?php
+namespace Shop;
 
 /**
  * Получение / сохранение настроек магазина
@@ -47,7 +48,7 @@ class Params
 		}
 		$q->prepare();
 		$q->stmt->execute();
-		$result = $q->stmt->fetchAll(PDO::FETCH_ASSOC);
+		$result = $q->stmt->fetchAll(\PDO::FETCH_ASSOC);
 		
 		$out = [];
 		foreach ($result as $row){

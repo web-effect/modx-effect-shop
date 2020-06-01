@@ -3,6 +3,14 @@ cd ~/_dev/modx-effect-shop
 Обновить субмодули
 git submodule update --remote
 
+
+
+npm run dev
+npm run prod
+
 Сборка пакета
 cd ~/_dev/modx-effect-shop/_build
 php7.2 build.transport.php
+
+git add -A && git commit -m ''
+git push origin master

@@ -1,4 +1,5 @@
 <?php
+namespace Shop;
 
 /**
  * Для работы сниппета shop
@@ -122,7 +123,7 @@ class CatalogSnippet extends Catalog
 
 		$qr->prepare();
 		$qr->stmt->execute();
-		$rows_range = $qr->stmt->fetchAll(PDO::FETCH_ASSOC);
+		$rows_range = $qr->stmt->fetchAll(\PDO::FETCH_ASSOC);
         
 
 		foreach ($rows_range as $row) {
@@ -172,7 +173,7 @@ class CatalogSnippet extends Catalog
 
         $q->prepare();
 		$q->stmt->execute();
-		$rows_tvs = $q->stmt->fetchAll(PDO::FETCH_ASSOC);
+		$rows_tvs = $q->stmt->fetchAll(\PDO::FETCH_ASSOC);
 		
 		$dicts_values = [];
 
@@ -205,7 +206,7 @@ class CatalogSnippet extends Catalog
             ]);
             $qd->prepare();
             $qd->stmt->execute();
-            $dicts_titles = $qd->stmt->fetchAll(PDO::FETCH_ASSOC);
+            $dicts_titles = $qd->stmt->fetchAll(\PDO::FETCH_ASSOC);
         }
 		$dicts_titles = array_column($dicts_titles, 'pagetitle', 'id');
 

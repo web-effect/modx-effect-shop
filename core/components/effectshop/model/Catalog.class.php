@@ -1,8 +1,9 @@
 <?php
+namespace Shop;
 
 class Catalog
 {
-    const GET_FIELDS = ['id', 'pagetitle', 'uri', 'price', 'price_old', 'image'];
+    const GET_FIELDS = ['id', 'pagetitle', 'uri', 'price', 'price_old', 'image', 'adds'];
     const SEARCH_QUERY = "(
         IF (`pagetitle` LIKE 'search%', 10, 0) +
         IF (`pagetitle` LIKE '% search %', 9, 0) +
@@ -46,7 +47,10 @@ class Catalog
     public static function getOneFull(int $id)
     {
         $cache = Shop::fromCache("fullproduct", $id, 'resource');
-        if ($cache) return self::countSavedProducts($cache);
+        if ($cache) {
+            $counted = self::countSavedProducts($cache);
+            return $counted[0] ?? false;
+        }
 
         global $modx;
         $resFields = array_keys($modx->getFields('modResource'));
@@ -58,7 +62,7 @@ class Catalog
         ]);
         $qres->prepare();
         $qres->stmt->execute();
-        $res = $qres->stmt->fetch(PDO::FETCH_ASSOC);
+        $res = $qres->stmt->fetch(\PDO::FETCH_ASSOC);
 
         if (empty($res)) return false;
 
@@ -75,15 +79,16 @@ class Catalog
 
         $q->prepare();
         $q->stmt->execute();
-        $tvs = $q->stmt->fetchAll(PDO::FETCH_ASSOC);
+        $tvs = $q->stmt->fetchAll(\PDO::FETCH_ASSOC);
         
         foreach ($tvs as $tv) {
             $res[$tv['name']] = $tv['value'];
         }
 
         $products = self::processProducts([$res]);
-        Shop::toCache($products[0], "fullproduct", $id, 'resource');
-        return self::countSavedProducts($products[0]);
+        Shop::toCache($products, "fullproduct", $id, 'resource');
+        $counted = self::countSavedProducts($products);
+        return $counted[0] ?? false;
     }
 
 
@@ -224,7 +229,7 @@ class Catalog
         }
         $q->prepare();
         $q->stmt->execute();
-        $rows = $q->stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $q->stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         /* Считаем кол-во, если оно может быть больше лимита */
         $total = count($rows);
@@ -304,22 +309,43 @@ class Catalog
         /* путь до картинок */
         $source_id = $modx->getOption('default_media_source',null,1);
         $modx->loadClass('sources.modMediaSource');
-        $source = modMediaSource::getDefaultSource($modx,$source_id);
+        $source = \modMediaSource::getDefaultSource($modx,$source_id);
         $source_properties = $source->getProperties();
         $img_path = $source_properties['basePath']['value'];
 
         foreach ($rows as &$item) {
             $item['name'] = htmlspecialchars($item['pagetitle']);
             unset($item['pagetitle']);
+            $item['price'] = (float)($item['price'] ?? 0);
             $item['_price'] = self::numFormat($item['price']);
             if (!empty($item['image'])) {
                 $item['image'] = "$img_path{$item['image']}";
             }
+            // считаем скидку
             if (!empty($item['price_old'])) {
-                $item['discount'] = 1 - ((int)$item['price'] / (int)$item['price_old']);
+                $item['price_old'] = (float)$item['price_old'];
+                $item['discount'] = 1 - ($item['price'] / $item['price_old']);
                 $item['discount'] = round($item['discount'] * 100);
                 $item['_price_old'] = self::numFormat($item['price_old']);
             }
+            // обработка таблиц (доп. товары)
+            foreach (['adds'] as $tableName) {
+                if (!empty($item[$tableName])) {
+                    $item[$tableName] = json_decode($item[$tableName], true);
+                    foreach ($item[$tableName] as $n => &$tableRow) {
+                        $tableRow['id'] = $tableRow['MIGX_id'] ?? $n;
+                        if (isset($tableRow['MIGX_id'])) unset($tableRow['MIGX_id']);
+                        if (!empty($tableRow['image'])) {
+                            $tableRow['image'] = "$img_path{$tableRow['image']}";
+                        }
+                        if (isset($tableRow['price'])) {
+                            $tableRow['price'] = (float)$tableRow['price'];
+                        }
+                    }
+                    unset($tableRow);
+                }
+            }
+
         }
         unset($item);
 
@@ -328,7 +354,7 @@ class Catalog
 
 
     /**
-     * 
+     * @todo кол-во будет считаться неверно при товаре с опциями
      */
     private static function countSavedProducts(array $input)
     {
@@ -339,8 +365,18 @@ class Catalog
 
         foreach ($rows as &$item) {
             $index = array_search($item['id'], $cartIds);
-            $cartQty = $index !== false && isset($cart[$index]) ? $cart[$index]['qty'] : 0;
-            $item['inCart'] = $cartQty;
+            $cartItem = ($index !== false && !empty($cart[$index])) ? $cart[$index] : false;
+            $item['in_cart'] = $cartItem ? $cartItem['qty'] : 0;
+            if (!empty($item['adds'])) {
+                foreach ($item['adds'] as &$add) {
+                    $add['in_cart'] = 0;
+                    if ($cartItem && !empty($cartItem['adds'])) {
+                        $tmp = array_column($cartItem['adds'], 'qty', 'id');
+                        $add['in_cart'] = $tmp[$add['id']];
+                    } 
+                }
+                unset($add);
+            }
         }
         unset($item);
 
@@ -370,7 +406,7 @@ class Catalog
         $q->sortby('rank', 'ASC');
         $q->prepare();
         $q->stmt->execute();
-        $tvs = $q->stmt->fetchAll(PDO::FETCH_ASSOC);
+        $tvs = $q->stmt->fetchAll(\PDO::FETCH_ASSOC);
         
         foreach ($tvs as $key => $tv)  {
             $out[$tv['name']]['id'] = (int)$tv['id'];
@@ -401,7 +437,7 @@ class Catalog
         ]);
         $q->prepare();
         $q->stmt->execute();
-        $ids = $q->stmt->fetchAll(PDO::FETCH_COLUMN);
+        $ids = $q->stmt->fetchAll(\PDO::FETCH_COLUMN);
         
         return $ids ?: [];
     }
@@ -449,7 +485,7 @@ class Catalog
         $q->sortby('relevant', 'DESC');
         $q->having("relevant>0");
         if ($q->prepare() && $q->stmt->execute()) {
-            $rows = $q->stmt->fetchAll(PDO::FETCH_ASSOC);
+            $rows = $q->stmt->fetchAll(\PDO::FETCH_ASSOC);
         }
         
         if ($mode != 'products') {
@@ -468,7 +504,7 @@ class Catalog
             $q2->sortby('relevant', 'DESC');
             $q2->having("relevant>0");
             if ($q2->prepare() && $q2->stmt->execute()) {
-                $rows2 = $q2->stmt->fetchAll(PDO::FETCH_ASSOC);
+                $rows2 = $q2->stmt->fetchAll(\PDO::FETCH_ASSOC);
                 $rows = array_merge($rows, $rows2);
             }
         }

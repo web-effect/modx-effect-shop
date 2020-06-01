@@ -1,4 +1,6 @@
 <?php
+namespace Shop;
+
 class Shop
 {
     /**
@@ -11,7 +13,7 @@ class Shop
 		if (!$cfg['shk']) {
 			$settings = Params::getSettings();
 		} else {
-			$settings = ESShopkeeper::getSettings();
+			$settings = Shk::getSettings();
 		}
         
 
@@ -54,7 +56,7 @@ class Shop
 		}
 
         $modx->getParser();
-        if (!$modx->parser instanceof pdoParser) return false;
+        if (!$modx->parser instanceof \pdoParser) return false;
         $output = $modx->parser->pdoTools->getChunk('@INLINE '. $chunkContent, $pls);
         return $output ?: false;
 	}
@@ -86,7 +88,7 @@ class Shop
 
 		$cacheOptions = [];
 		if ($cache_opt == 'resource') {
-			$cacheOptions = [xPDO::OPT_CACHE_KEY => 'resource'];
+			$cacheOptions = [\xPDO::OPT_CACHE_KEY => 'resource'];
 		}
 
 		$cache = $modx->cacheManager->get($name . $props, $cacheOptions);
@@ -110,7 +112,7 @@ class Shop
 
 		$cacheOptions = [];
 		if ($cache_opt == 'resource') {
-			$cacheOptions = [xPDO::OPT_CACHE_KEY => 'resource'];
+			$cacheOptions = [\xPDO::OPT_CACHE_KEY => 'resource'];
 		}
 
 		$cache = $modx->cacheManager->set($name . $props, $data, 0, $cacheOptions);

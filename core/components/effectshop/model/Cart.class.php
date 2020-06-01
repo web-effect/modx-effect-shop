@@ -1,4 +1,6 @@
 <?php
+namespace Shop;
+
 /**
  * Отвечает за корзину на сайте, расчёт цен, скидок в заказе
  */
@@ -27,17 +29,20 @@ class Cart
 	public function request($action)
 	{
 		$output = [];
+		$params = $_POST['params'] ?? [];
 
 		switch ($action) {
 			case 'add':
-				$opts = $_POST['options'] ?? [];
-				$output['product'] = $this->add((int)$_POST['id'], (int)$_POST['qty'], $opts);
+				$output['product'] = $this->add((int)$_POST['id'], (int)$_POST['qty'], $params);
 				break;
 			case 'remove':
 				$output['product'] = $this->remove((int)$_POST['index']);
 				break;
 			case 'qty':
 				$output['product'] = $this->qty((int)$_POST['index'], (int)$_POST['qty']);
+				break;
+			case 'change':
+				$output['product'] = $this->change((int)$_POST['index'], $params);
 				break;
 			default:	
 		}
@@ -51,7 +56,7 @@ class Cart
 	/**
 	 * 
 	 */
-	private function add(int $id, int $qty = 1, array $options = [])
+	private function add(int $id, int $qty = 1, array $params = [])
 	{
 		$product = Catalog::getOne($id);
 		if (empty($product)) return false;
@@ -60,8 +65,13 @@ class Cart
 		$product['qty'] = $this->cleanCount($qty) ?: 1;
 		$product['url'] = $this->modx->makeUrl($product['id'], '', '', 'full' );
 		
-		foreach ($options as $name => $opt) {
-			$product['options'][$name] = $opt;
+		if (!empty($params['opts'])) {
+			foreach ($params['opts'] as $name => $opt) {
+				$product['options'][$name] = $opt;
+			}
+		}
+		if (isset($params['adds']) && !empty($product['adds'])) {
+			$product = $this->addAdds($product, $params['adds']);
 		}
 
 		$intersect = $this->checkIntersect($product);
@@ -78,6 +88,28 @@ class Cart
 	/**
 	 * 
 	 */
+	private function addAdds(array $product, $adds)
+	{
+		$adds = gettype($adds) == 'array' ? $adds : [];
+		$product['adds_values'] = [];
+		foreach ($adds as $add) {
+			$product['adds_values'][] = (int)$add;
+		}
+		array_unique($product['adds_values']);
+		foreach ($product['adds'] as $key => $add) {
+			$product['adds'][$key]['qty'] = 0;
+			if (in_array($add['id'], $product['adds_values'])) {
+				$product['adds'][$key]['qty'] = 1;
+			}
+		}
+
+		return $product;
+	}
+
+
+	/**
+	 * 
+	 */
 	private function qty(int $index, $qty)
 	{
 		$product = [];
@@ -85,6 +117,31 @@ class Cart
 			$product = $this->cart['items'][$index];
 			$this->cart['items'][$index]['qty'] = $this->cleanCount($qty);
 		}
+		return $product;
+	}
+
+
+	/**
+	 * 
+	 */
+	private function change(int $index, array $params)
+	{
+		$product = [];
+
+		if ($this->cart['items'][$index]) {
+			$product = $this->cart['items'][$index];
+
+			foreach ($params as $name => $val) {
+				if ($name == 'qty') {
+					$this->cart['items'][$index]['qty'] = $this->cleanCount($val);
+				}
+				if ($name == 'adds' && !empty($product['adds'])) {
+					$product = $this->addAdds($product, $val);
+					$this->cart['items'][$index] = $product;
+				}
+			}
+		}
+
 		return $product;
 	}
 	
@@ -115,7 +172,16 @@ class Cart
 		
 		foreach($order['items'] as $k => &$item) {
 			$item['qty'] = (int)$item['qty'];
-			$item['price'] = (float)$item['price'];
+			$item['initial_price'] = (float)$item['price'];
+			$item['price'] = $item['initial_price'];
+
+			if (!empty($item['adds'])) {
+				foreach ($item['adds'] as $add) {
+					$addPrice = (float)$add['price'] * ($add['qty'] ?? 0);
+					$item['price'] += $addPrice;
+				}
+			}
+
 			$order['qty'] += $item['qty'];
 			$item['total_price'] = round(($item['price'] * $item['qty']), 2);
 			$order['price'] += $item['total_price'];
@@ -143,7 +209,7 @@ class Cart
 				$path = stripos($item['image'], 'assets/mgr') === false ? "/assets/mgr/{$item['image']}" : $item['image'];
 				$thumb = $this->modx->runSnippet('phpthumbon', [
 					'input' => $path,
-					'options' => $cfg['catalog']['thumb'] ?? 'w=70&h=70',
+					'options' => $cfg['thumb'] ?? 'w=70&h=70',
 				]);
 				$item['thumb'] = $thumb;
 			}
@@ -152,19 +218,20 @@ class Cart
 
 	
 	/**
-	 * Проверяем, есть ли уже товар в корзине. Взято из Shopkeeper3
+	 * Проверяем, есть ли уже товар в корзине
 	 */
 	private function checkIntersect($product)
 	{
 		$output = false;
 		for( $i=0; $i < count($this->cart['items']); $i++ ){
-			if( $this->cart['items'][$i]['id'] == $product['id'] ){
-				if( $this->cart['items'][$i]['price'] == $product['price'] ){
-					if( serialize($this->cart['items'][$i]['options']) == serialize($product['options']) ) {
-						$output = $i;
-						break;
-					}
-				}
+			if (
+				$this->cart['items'][$i]['id'] == $product['id']
+				&& $this->cart['items'][$i]['price'] == $product['price']
+				&& serialize($this->cart['items'][$i]['opts']) == serialize($product['opts'])
+				&& serialize($this->cart['items'][$i]['adds_values']) == serialize($product['adds_values'])
+			) {
+				$output = $i;
+				break;
 			}
 		}
 		return $output;

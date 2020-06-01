@@ -1,5 +1,5 @@
 <?php
-
+namespace Shop;
 
 class Mail 
 {
@@ -62,11 +62,11 @@ class Mail
 		
 
 		$modx->getService('mail', 'mail.modPHPMailer');
-		$modx->mail->set( modMail::MAIL_BODY, $body );
-		$modx->mail->set( modMail::MAIL_FROM, $from );
-		$modx->mail->set( modMail::MAIL_SENDER, $from );
-		$modx->mail->set( modMail::MAIL_FROM_NAME, $sitename);
-		$modx->mail->set( modMail::MAIL_SUBJECT, $subject );
+		$modx->mail->set( \modMail::MAIL_BODY, $body );
+		$modx->mail->set( \modMail::MAIL_FROM, $from );
+		$modx->mail->set( \modMail::MAIL_SENDER, $from );
+		$modx->mail->set( \modMail::MAIL_FROM_NAME, $sitename);
+		$modx->mail->set( \modMail::MAIL_SUBJECT, $subject );
         $modx->mail->setHTML(true);
 		foreach($mails as $k=>$mail) {
 			$modx->mail->address('to', trim($mail));
@@ -89,7 +89,7 @@ class Mail
 		
 
 		if (!$modx->mail->send()) {
-            $modx->log(modX::LOG_LEVEL_ERROR,'An error occurred while trying to send the email: '.$modx->mail->mailer->ErrorInfo);
+            $modx->log(\modX::LOG_LEVEL_ERROR,'An error occurred while trying to send the email: '.$modx->mail->mailer->ErrorInfo);
 			$errors[] =  $modx->mail->mailer->ErrorInfo;
 			return [0, $errors];
 		}

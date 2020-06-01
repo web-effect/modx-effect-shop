@@ -1,8 +1,10 @@
 <?php
+namespace Shop;
+
 /**
  * Для совместимости заказов с Shopkeeper
  */
-class ESShopkeeper
+class Shk
 {
 
 	public function __construct()
@@ -34,7 +36,7 @@ class ESShopkeeper
 		$cf_q->prepare();
 
 		$cf_q->stmt->execute();
-		$cf_result = $cf_q->stmt->fetchAll(PDO::FETCH_ASSOC);
+		$cf_result = $cf_q->stmt->fetchAll(\PDO::FETCH_ASSOC);
 
 		$out = [];
 		foreach ($cf_result as $set) {
@@ -137,17 +139,21 @@ class ESShopkeeper
 	
 			foreach( $input['items'] as $key => $p_data ) {
 
-				$options = '';
-				if (!empty($p_data['options'])) {
-					$options = [];
-					foreach ($p_data['options'] as $name => $opt) {
-						$options[$name] = [$opt, 0, 0];
-					}
-					$options = json_encode($options);
+				$options = [];
+				
+				$options = [];
+				foreach ($p_data['opts'] ?? [] as $name => $opt) {
+					$options[$name] = [$opt, 0, 0];
 				}
+				foreach ($p_data['adds'] ?? [] as $name => $add) {
+					if ($add['qty']) {
+						$options[$add['id']] = [$add['name'], $add['price'], 0];
+					}
+				}
+				$options = json_encode($options);
+			
 
 			
-				
 				$fields_data = [];
 				$fields_data['url'] = !empty( $p_data['url'] ) ? $p_data['url'] : '';
 				foreach ($cfg['product_get_fields'] ?? [] as $i) {
@@ -160,7 +166,7 @@ class ESShopkeeper
 					'p_id' => $p_data['id'],
 					'order_id' => $order->id,
 					'name' => $p_data['name'],
-					'price' => $p_data['price'],
+					'price' => $p_data['initial_price'],
 					'count' => $p_data['qty'],
 					'class_name' => 'modResource',
 					'package_name' => '',
@@ -237,18 +243,15 @@ class ESShopkeeper
 		$cart_q->stmt->execute();
 		$cart=array();
 
-		while ($purchase = $cart_q->stmt->fetch(PDO::FETCH_ASSOC)) {
+		while ($purchase = $cart_q->stmt->fetch(\PDO::FETCH_ASSOC)) {
 			$_keys=explode('||',str_replace('shk_purchases_','',implode('||',array_keys($purchase))));
 			$purchase = array_combine($_keys,array_values($purchase));
 			$purchase['id'] = $purchase['p_id'];
 			$purchase['qty'] = $purchase['count'];
 			
 			$opts = json_decode($purchase['options'],true) ?: [];
-			$purchase['options'] = [];
-			foreach ($opts as $k => $o) {
-				$purchase['options'][$k] = $o[0];
-			}
-			
+			$purchase['options'] = $opts;
+	
 			$pdada = json_decode($purchase['data'],true) ?: [];
 			foreach ($pdada as $k => $d) {
 				if (!isset($purchase[$k])) $purchase[$k] = $d;

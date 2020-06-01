@@ -1,4 +1,5 @@
 <?php
+namespace Shop;
 
 class User 
 {
@@ -85,7 +86,7 @@ class User
 			$q->select(['modUserProfile.id', 'modUserProfile.email', 'user.username', 'fullname', 'phone', 'city', 'extended']);
 			$q->prepare();
 			$q->stmt->execute();
-			$out = $q->stmt->fetch(PDO::FETCH_ASSOC);
+			$out = $q->stmt->fetch(\PDO::FETCH_ASSOC);
 			if (!empty($out['extended'])) {
 				$ext = json_decode($out['extended'], true);
 				$out = array_merge($out, $ext);

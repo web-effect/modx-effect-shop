@@ -1,4 +1,6 @@
 <?php
+namespace Shop;
+
 class Pay
 {
 	const ST_PAY_WAIT = 'pay_wait';
