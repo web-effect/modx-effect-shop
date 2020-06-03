@@ -18,7 +18,7 @@ class Order
         $this->modx = &$modx;
         $this->modx->addPackage('effectshop', MODX_CORE_PATH . 'components/effectshop/model/');
         $this->cfg = Params::cfg();
-        $this->shk = $this->cfg['shk'] ?? false; //использовать ли Shopkeeper для заказов
+        $this->shk = $this->cfg['shk'] ?: false; //использовать ли Shopkeeper для заказов
     }
 
 
@@ -56,7 +56,7 @@ class Order
      * Отправка формы заказа
      */
     private function sendForm($post) {
-
+        
         if (!filter_var($post['email'], FILTER_VALIDATE_EMAIL)) {
             return [0, "Email {$post['email']} неверный"];
         }
@@ -106,13 +106,8 @@ class Order
             $this->saveOrder($order, $order['id']);		
         }*/
         
-
-        $Mail = new Mail($this->modx);
-        $cfgMailTo = $this->cfg['mail_to_tv'];
-        $mailTo = $this->getTv($cfgMailTo[0], $cfgMailTo[1]);
-        
         $mail = Mail::send([
-            'to' => $mailTo,
+            'to' => $this->cfg['mail_to'],
             'subject' => "На сайте SITENAME сделан новый заказ",
             'pls' => [
                 'mode' => 'new',
@@ -120,7 +115,7 @@ class Order
             ]
         ]);
         
-        $mail2 = $Mail->send([
+        $mail2 = Mail::send([
             'to' => $post['email'],
             'subject' => "Вы сделали заказ на сайте SITENAME",
             'pls' => [
@@ -370,26 +365,4 @@ class Order
         ];
     }
 
-
-    /**
-     * 
-     */
-    private function getTv($name, $id)
-    {	
-        $val = false;
-        $query1 = $this->modx->newQuery('modTemplateVar', [
-            'name' => $name,
-        ]);
-        $query1->select('id');
-        $tv_id = $this->modx->getValue($query1->prepare());	
-        if ($tv_id) {
-            $query2 = $this->modx->newQuery('modTemplateVarResource', [
-                'tmplvarid' => $tv_id, 'contentid' => $id
-            ]);
-            $query2->select('value');
-            $val = $this->modx->getValue($query2->prepare());
-        }
-        return $val;
-    }
-    
 }

@@ -1,5 +1,34 @@
 <?php
 
+$sets = [
+    'shk' => [
+        'value' => 0
+    ],
+    'product_tmpls' => [
+        'value' => 7
+    ],
+    'section_tmpls' => [
+        'value' => 6
+    ],
+    'product_get_fields' => [
+        'value' => 'introtext'
+    ],
+    'thumb' => [
+        'value' => 'w=110&h=110'
+    ],
+    'order_report_tpl' => [
+        'value' => 'shop-order-report'
+    ],
+
+    'filter_exclude' => [
+        'value' => 'price_old'
+    ],
+    'filter_collections' => [
+        'value' => 0
+    ],
+
+];
+
 $data['modSystemSetting'] = [
     [
         'fields' => [
@@ -10,26 +39,7 @@ $data['modSystemSetting'] = [
         ],
         'options' => $config['data_options']['modSystemSetting']
     ],
-    [
-        'fields' => [
-            'key' => $config['component']['namespace'].'.product.tmpls',
-            'value' => '7',
-            'xtype' => 'textfield',
-            'namespace' => $config['component']['namespace'],
-            'area' => $config['component']['namespace'].'.main'
-        ],
-        'options' => $config['data_options']['modSystemSetting']
-    ],
-    [
-        'fields' => [
-            'key' => $config['component']['namespace'].'.product.get_fields',
-            'value' => '',
-            'xtype' => 'textfield',
-            'namespace' => $config['component']['namespace'],
-            'area' => $config['component']['namespace'].'.main'
-        ],
-        'options' => $config['data_options']['modSystemSetting']
-    ],
+    /*
     [
         'fields' => [
             'key' => $config['component']['namespace'].'.contacts',
@@ -39,5 +49,18 @@ $data['modSystemSetting'] = [
             'area' => $config['component']['namespace'].'.main'
         ],
         'options' => $config['data_options']['modSystemSetting']
-    ],
+    ],*/
 ];
+
+foreach ($sets as $key => $set) {
+    $data['modSystemSetting'][] = [
+        'fields' => [
+            'key' => $config['component']['namespace']. '.'. $key,
+            'value' => $set['value'] ?? '',
+            'xtype' => $set['xtype'] ?? 'textfield',
+            'namespace' => $config['component']['namespace'],
+            'area' => $config['component']['namespace'].'.main'
+        ],
+        'options' => $config['data_options']['modSystemSetting']
+    ];
+}

@@ -26,7 +26,37 @@ class Params
 	 */
 	public static function cfg()
 	{
-		return require(__DIR__.'/../config.php');
+		$array = require(__DIR__.'/../config.php');
+
+		$array['mail_to'] = self::getOpt('mail_to', '');
+
+		$array['shk'] = self::getOpt('effectshop.shk', 0);
+		$array['thumb'] = self::getOpt('effectshop.thumb', 'w=110&h=110');
+		$array['order_report_tpl'] = self::getOpt('effectshop.order_report_tpl', 'shop-order-report');
+
+		$array['product_get_fields'] = self::getOpt('effectshop.product_get_fields', '', true);
+		$array['product_tmpls'] = self::getOpt('effectshop.product_tmpls', '7', true);
+		$array['section_tmpls'] = self::getOpt('effectshop.section_tmpls', '6', true);
+
+		$array['filter_exclude'] = self::getOpt('effectshop.filter_exclude', '', true);
+		$array['filter_collections'] = self::getOpt('effectshop.filter_collections', 0);
+		
+		return $array;
+	}
+
+
+	/**
+	 * 
+	 */
+	private static function getOpt($option, $default = '', $isArray = false)
+	{
+		global $modx;
+		$opt = $modx->getOption($option, null, $default);
+		if ($isArray) {
+			$opt = explode(',', $opt);
+			$opt = array_map('trim', $opt);
+		}
+		return $opt;
 	}
 
 
