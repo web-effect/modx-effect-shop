@@ -1,151 +1,7 @@
 const DEV = !!(process.env.NODE_ENV === 'development');
 const appNodes = document.querySelectorAll('.vue-shop-cart') || [];
 
-/* общие данные для всех эксемпляров shop-app */
-const data = {
-    status: 'loading',
-    cart: {
-        qty: 0,
-        items: {}
-    },
-    methods: {},
-    form: {},
-    lastOrder: {},
-
-    loading: {
-        cart: true,
-        form: false,
-    },
-    error: '',
-    
-    favoritesCount: 0,
-    compareCount: 0,
-};
-
-
-const mixin = {
-    data,
-    delimiters: ['(#', '#)'],
-    methods: {
-
-        request(action, data, callback) {
-            this.loading.cart = true;
-
-            this.$shop.http('cart', action, data)
-                .then((response) => {
-                    response[0] != 1 && alert('Ошибка: корзина не загружена.');
-                    this.cart = response.cart;
-                    if (callback) callback();
-                    
-                    this.loading.cart = false;
-                    this.status = this.cart.qty ? 'default' : 'empty';
-
-                    const event = new CustomEvent('shop-cart-request', {
-                        detail: { action, data, response }
-                    });
-                    document.dispatchEvent(event);
-                    DEV && console.log(action, data, response);
-                });
-        },
-
-        remove(index) {
-            if (confirm('Удалить товар из корзины?')) {
-                this.request('remove', { index });
-            }
-        },
-        
-        qty(index, plus, min = 1) {
-            const qty = +this.cart.items[index].qty + plus;
-            if (qty < min) return;
-            if (qty === 0) {
-                this.remove(index);
-                return;
-            }
-            this.cart.items[index].qty = qty;
-            this.request('qty', { index, qty });
-        },
-
-        change(index, params) {
-            this.request('change', { index, params });
-        },
-        
-        indexById(id) {
-            const i = this.cart.items.findIndex((a) => a.id == id);
-            return i;
-        },
-
-        sendForm() {
-            this.loading.form = true;
-            this.formError = '';
-
-            this.$shop.http('order', 'sendForm', this.form)
-                .then((data) => {
-                    DEV && console.log(data);
-                    if (data[0]) {
-                        this.status = 'success';
-                        this.cart = { items: {}, qty: 0 };
-                        this.form.comment =  this.form.message = '';
-                        this.lastOrder = data[1];					
-                    } else {
-                        this.error = data || 'Ошибка';
-                    }
-                    this.loading.form = false;
-                    //window.scrollTo({ top: 0 });
-
-                    const event = new CustomEvent('shop-cart-order', {
-                        detail: { order: this.lastOrder }
-                    });
-                    document.dispatchEvent(event);
-                });
-        },
-
-        getProductForm(el) {
-            const out = {};
-            const form = el.tagName == 'FORM' ? el : el.closest('form');
-            if (!form) return false;
-
-            out.form = form;
-            out.button = form.querySelector('.shop-item-button');
-
-            out.id_el = form.querySelector('[name=id]');
-            out.qty_el = form.querySelector('[name=qty]');
-            out.opt_els = form.querySelectorAll('[name^=opt-]') || [];
-            out.adds_els = form.querySelectorAll('[name=adds]:checked');
-
-            out.id = +out.id_el.value;
-            out.qty = out.qty_el ? +out.qty_el.value : 1;
-
-            out.params = { opts: {} };
-            out.params.adds = Array.from(out.adds_els).map(cb => cb.value);
-
-            out.opt_els.forEach((opt) => {
-                if (opt.value) out.params.opts[opt.name] = opt.value;
-            })
-
-            return out;
-        }
-    },
-    
-    computed: {
-        plural() {
-            const n = this.cart.qty,
-                  cases = [2, 0, 1, 1, 1, 2],
-                  words = ['товар', 'товара', 'товаров'];
-            return words[(n%100>4 && n%100<20) ? 2 : cases[(n%10<5)?n%10:5]];  
-        },
-        
-        cartClasses() {
-            return [
-                { 'is-loaded': this.status != 'loading' },
-                { 'is-loading': this.loading.cart },
-                { 'is-empty': !this.cart.qty },
-                { 'not-empty': !!this.cart.qty }
-            ]
-        }
-    },
-    
-};
-
+import mixin from './cart-mixin.js';
 
 const ShopCartApp = new Vue({
     
@@ -221,10 +77,10 @@ document.addEventListener('submit', (e) => {
           id = +id_el.value,
           qty = qty_el ? +qty_el.value : 1,
           opt_els = form.querySelectorAll('[name^=opt-]') || [],
-          adds_els = form.querySelectorAll('[name=adds]:checked'),
+          //addons_els = form.querySelectorAll('[name=addons]:checked'),
           params = { opts: {} };
 
-    params.adds =  Array.from(adds_els).map(cb => cb.value);
+    //params.addons =  Array.from(addons_els).map(cb => cb.value);
 
     opt_els.forEach((opt) => {
         if (opt.value) params.opts[opt.name] = opt.value;
@@ -254,7 +110,7 @@ document.addEventListener('click', (e) => {
     if (!btn) return;
     e.preventDefault();
 
-    const input = e.target.closest('.shop-item').querySelector('[name=qty]'),
+    const input = e.target.parentNode.querySelector('[name*=qty]'),
           x = btn.classList.contains('shop-item-minus') ? -1 : 1,
           val = (parseInt(input.value) || 0) + x;
 
@@ -266,8 +122,9 @@ document.addEventListener('click', (e) => {
 });
 
 document.addEventListener('blur', (e) => {
-    if (!e.target.matches('.shop-item [name=qty]')) return;
-    if (!parseInt(e.target.value)) e.target.value = 1
+    if (!e.target.matches('.shop-item [name*=qty]')) return;
+    let min = e.target.hasAttribute('min') ? +e.target.value.min : 1;
+    if (!parseInt(e.target.value)) e.target.value = min;
 }, true);
 
 

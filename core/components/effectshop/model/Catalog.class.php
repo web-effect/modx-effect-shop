@@ -3,7 +3,7 @@ namespace Shop;
 
 class Catalog
 {
-    const GET_FIELDS = ['id', 'pagetitle', 'uri', 'price', 'price_old', 'image', 'adds'];
+    const GET_FIELDS = ['id', 'pagetitle', 'uri', 'price', 'price_old', 'image', 'addons'];
     const SEARCH_QUERY = "(
         IF (`pagetitle` LIKE 'search%', 10, 0) +
         IF (`pagetitle` LIKE '% search %', 9, 0) +
@@ -47,10 +47,7 @@ class Catalog
     public static function getOneFull(int $id)
     {
         $cache = Shop::fromCache("fullproduct", $id, 'resource');
-        if ($cache) {
-            $counted = self::countSavedProducts($cache);
-            return $counted[0] ?? false;
-        }
+        if ($cache) return $cache;
 
         global $modx;
         $resFields = array_keys($modx->getFields('modResource'));
@@ -86,9 +83,9 @@ class Catalog
         }
 
         $products = self::processProducts([$res]);
-        Shop::toCache($products, "fullproduct", $id, 'resource');
-        $counted = self::countSavedProducts($products);
-        return $counted[0] ?? false;
+        Shop::toCache($products[0], "fullproduct", $id, 'resource');
+        return $products[0] ?: false;
+        
     }
 
 
@@ -99,7 +96,7 @@ class Catalog
     {
         $cacheKey = 'products_' . ($pagination ? 'pg' : 'nopg');
         $cache = Shop::fromCache($cacheKey, $props, 'resource');
-        if ($cache) return self::countSavedProducts($cache);
+        if ($cache) $cache;
 
 
         $time_start = microtime(true);
@@ -270,7 +267,7 @@ class Catalog
             Shop::toCache($out, $cacheKey, $props, 'resource');
         }
         
-        return self::countSavedProducts($out);
+        return $out;
     }
 
 
@@ -329,7 +326,7 @@ class Catalog
                 $item['_price_old'] = self::numFormat($item['price_old']);
             }
             // обработка таблиц (доп. товары)
-            foreach (['adds'] as $tableName) {
+            foreach (['addons'] as $tableName) {
                 if (!empty($item[$tableName])) {
                     $item[$tableName] = json_decode($item[$tableName], true);
                     foreach ($item[$tableName] as $n => &$tableRow) {
@@ -341,6 +338,7 @@ class Catalog
                         if (isset($tableRow['price'])) {
                             $tableRow['price'] = (float)$tableRow['price'];
                         }
+                        $tableRow['qty'] = 0;
                     }
                     unset($tableRow);
                 }
@@ -351,43 +349,6 @@ class Catalog
 
         return $rows;
     }
-
-
-    /**
-     * @todo кол-во будет считаться неверно при товаре с опциями
-     */
-    private static function countSavedProducts(array $input)
-    {
-        $rows = $input['rows'] ?? $input;
-        
-        $cart = $_SESSION['shop_cart']['items'] ?? [];
-        $cartIds = array_column($cart , 'id');
-
-        foreach ($rows as &$item) {
-            $index = array_search($item['id'], $cartIds);
-            $cartItem = ($index !== false && !empty($cart[$index])) ? $cart[$index] : false;
-            $item['in_cart'] = $cartItem ? $cartItem['qty'] : 0;
-            if (!empty($item['adds'])) {
-                foreach ($item['adds'] as &$add) {
-                    $add['in_cart'] = 0;
-                    if ($cartItem && !empty($cartItem['adds'])) {
-                        $tmp = array_column($cartItem['adds'], 'qty', 'id');
-                        $add['in_cart'] = $tmp[$add['id']];
-                    } 
-                }
-                unset($add);
-            }
-        }
-        unset($item);
-
-        if (empty($input['rows'])) {
-            return $rows;
-        } else {
-            $input['rows'] = $rows;
-            return $input;
-        }
-    }
-
 
 
     /**

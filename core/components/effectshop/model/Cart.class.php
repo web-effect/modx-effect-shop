@@ -11,10 +11,14 @@ class Cart
 	{
 		global $modx;
 		$this->modx = &$modx;
+		$this->cfg = Params::cfg();
 
 		if (!$order) {
 			if (empty($_SESSION['shop_cart']) || empty($_SESSION['shop_cart']['items'])) {
-				$_SESSION['shop_cart'] = ['items' => []];
+				$_SESSION['shop_cart'] = [
+					'items' => [],
+					'created' => time()
+				];
 			}
 			$this->cart = &$_SESSION['shop_cart'];
 		} else {
@@ -41,8 +45,11 @@ class Cart
 			case 'qty':
 				$output['product'] = $this->qty((int)$_POST['index'], (int)$_POST['qty']);
 				break;
-			case 'change':
-				$output['product'] = $this->change((int)$_POST['index'], $params);
+			case 'addonQty':
+				$output['product'] = $this->addonQty((int)$_POST['index'], (int)$_POST['addon'], (float)$_POST['qty']);
+				break;
+			case 'clean':
+				$this->clean();
 				break;
 			default:	
 		}
@@ -54,7 +61,16 @@ class Cart
 
 
 	/**
-	 * 
+	 * Очистить корзину
+	 */
+	private function clean()
+	{
+		$_SESSION['shop_cart'] = [];
+	}
+
+
+	/**
+	 * Добавить товар
 	 */
 	private function add(int $id, int $qty = 1, array $params = [])
 	{
@@ -70,12 +86,14 @@ class Cart
 				$product['options'][$name] = $opt;
 			}
 		}
-		if (isset($params['adds']) && !empty($product['adds'])) {
-			$product = $this->addAdds($product, $params['adds']);
-		}
 
 		$intersect = $this->checkIntersect($product);
 		if ($intersect === false) {
+			$product = $this->cropImage($product);
+			foreach ($product['addons'] ?? [] as $a_key => $add) {
+				$product['addons'][$a_key] = $this->cropImage($add);
+			}
+
 			array_push($this->cart['items'], $product);
 		} else {
 			$this->cart['items'][$intersect]['qty'] += $product['qty'];
@@ -86,29 +104,7 @@ class Cart
 
 
 	/**
-	 * 
-	 */
-	private function addAdds(array $product, $adds)
-	{
-		$adds = gettype($adds) == 'array' ? $adds : [];
-		$product['adds_values'] = [];
-		foreach ($adds as $add) {
-			$product['adds_values'][] = (int)$add;
-		}
-		array_unique($product['adds_values']);
-		foreach ($product['adds'] as $key => $add) {
-			$product['adds'][$key]['qty'] = 0;
-			if (in_array($add['id'], $product['adds_values'])) {
-				$product['adds'][$key]['qty'] = 1;
-			}
-		}
-
-		return $product;
-	}
-
-
-	/**
-	 * 
+	 * Изменить кол-во
 	 */
 	private function qty(int $index, $qty)
 	{
@@ -122,26 +118,18 @@ class Cart
 
 
 	/**
-	 * 
+	 * Изменить кол-во доп. товара
+	 * Доп. товар есть всегда с кол-вом 0, добавлять его не нужно
 	 */
-	private function change(int $index, array $params)
+	private function addonQty(int $index, int $a_index, float $qty)
 	{
 		$product = [];
-
-		if ($this->cart['items'][$index]) {
+		if (!empty($this->cart['items'][$index])) {
 			$product = $this->cart['items'][$index];
-
-			foreach ($params as $name => $val) {
-				if ($name == 'qty') {
-					$this->cart['items'][$index]['qty'] = $this->cleanCount($val);
-				}
-				if ($name == 'adds' && !empty($product['adds'])) {
-					$product = $this->addAdds($product, $val);
-					$this->cart['items'][$index] = $product;
-				}
+			if (!empty($this->cart['items'][$index]['addons'][$a_index])) {
+				$this->cart['items'][$index]['addons'][$a_index]['qty'] = (float)$qty;
 			}
 		}
-
 		return $product;
 	}
 	
@@ -172,14 +160,16 @@ class Cart
 		
 		foreach($order['items'] as $k => &$item) {
 			$item['qty'] = (int)$item['qty'];
-			$item['initial_price'] = (float)$item['price'];
+			$item['initial_price'] = $item['initial_price'] ?? (float)$item['price'];
 			$item['price'] = $item['initial_price'];
 
-			if (!empty($item['adds'])) {
-				foreach ($item['adds'] as $add) {
-					$addPrice = (float)$add['price'] * ($add['qty'] ?? 0);
+			if (!empty($item['addons'])) {
+				foreach ($item['addons'] as &$add) {
+					$add['qty'] = (float)$add['qty'] ?: 0;
+					$addPrice = (float)$add['price'] * $add['qty'];
 					$item['price'] += $addPrice;
 				}
+				unset($add);
 			}
 
 			$order['qty'] += $item['qty'];
@@ -199,21 +189,18 @@ class Cart
 
 
 	/**
-	 * Обрезка картинок в корзине
+	 * Обрезка картинки
 	 */
-	public function cropImages()
+	private function cropImage(array $item)
 	{
-		$cfg = Params::cfg();
-		foreach ($this->cart['items'] as $k => &$item ) {
-			if (!empty($item['image']) && empty($item['thumb'])) {
-				$path = stripos($item['image'], 'assets/mgr') === false ? "/assets/mgr/{$item['image']}" : $item['image'];
-				$thumb = $this->modx->runSnippet('phpthumbon', [
-					'input' => $path,
-					'options' => $cfg['thumb'] ?? 'w=70&h=70',
-				]);
-				$item['thumb'] = $thumb;
-			}
+		if (!empty($item['image']) && empty($item['thumb'])) {
+			$thumb = $this->modx->runSnippet('phpthumbon', [
+				'input' => $item['image'],
+				'options' => $this->cfg['thumb'] ?? 'w=70&h=70',
+			]);
+			$item['thumb'] = $thumb;
 		}
+		return $item;
 	}
 
 	
@@ -228,7 +215,7 @@ class Cart
 				$this->cart['items'][$i]['id'] == $product['id']
 				&& $this->cart['items'][$i]['price'] == $product['price']
 				&& serialize($this->cart['items'][$i]['opts']) == serialize($product['opts'])
-				&& serialize($this->cart['items'][$i]['adds_values']) == serialize($product['adds_values'])
+				&& serialize($this->cart['items'][$i]['addons_values']) == serialize($product['addons_values'])
 			) {
 				$output = $i;
 				break;

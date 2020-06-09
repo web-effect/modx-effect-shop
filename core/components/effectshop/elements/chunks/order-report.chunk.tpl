@@ -49,14 +49,16 @@
                             <td {$css_td}>{$i.qty}</td>
                             <td {$css_td}>{($i.initial_price ?: $i.price)|num_format} руб.</td>
                         </tr>
-                        {if $i.options}
-                            {foreach $i.options as $k=>$a}
-                                <tr>
-                                    <td {$css_td}></td>
-                                    <td {$css_td}><i>+ {$a[0]}<i></td>
-                                    <td {$css_td}></td>
-                                    <td {$css_td}>{$a[1]} руб.</td>
-                                </tr>
+                        {if $i.addons}
+                            {foreach $i.addons as $k=>$a}
+                                {if $a.qty}
+                                    <tr style="color: #4f4f4f; font-size: 0.875em;">
+                                        <td {$css_td}></td>
+                                        <td {$css_td}>+ {$a.name}</td>
+                                        <td {$css_td}>{$a.qty}</td>
+                                        <td {$css_td}>{$a.price|num_format} руб.</td>
+                                    </tr>
+                                {/if}
                             {/foreach}
                         {/if}
 

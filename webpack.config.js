@@ -3,14 +3,13 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 
 module.exports = (env, argv) => {
-    const entry = {
-        manager: './src/manager/index.js',
-    }
+    const entry = {};
     if (argv.mode === 'production') {
         entry['shop.min'] = './src/frontend/index.js';
         //entry.polyfills = './src/polyfills.js';
     } else {
         entry.shop = './src/frontend/index.js';
+        entry.manager = './src/manager/index.js';
     }
 
     return {

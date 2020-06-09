@@ -26,6 +26,9 @@ class Params
 	 */
 	public static function cfg()
 	{
+		$cache = Shop::fromCache('shop_cfg');
+        if ($cache) return $cache;
+
 		$array = require(__DIR__.'/../config.php');
 
 		$array['mail_to'] = self::getOpt('mail_to', '');
@@ -41,6 +44,7 @@ class Params
 		$array['filter_exclude'] = self::getOpt('effectshop.filter_exclude', '', true);
 		$array['filter_collections'] = self::getOpt('effectshop.filter_collections', 0);
 		
+		Shop::toCache($array, 'shop_cfg');
 		return $array;
 	}
 

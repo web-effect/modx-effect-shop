@@ -29,7 +29,7 @@ Vue.prototype.$shop = new Vue({
             let fd = form || new FormData();
             let formKey;
             for (let property in obj) {
-                if (obj.hasOwnProperty(property) && obj[property]) {
+                if (obj.hasOwnProperty(property) && obj[property] !== 'undefined') {
                     formKey = namespace ? namespace + '[' + property + ']' : property;
                     // Пустой массив
                     if (Array.isArray(obj[property]) && !obj[property].length) {

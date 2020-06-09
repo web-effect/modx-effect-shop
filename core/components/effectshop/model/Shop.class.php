@@ -20,7 +20,6 @@ class Shop
         switch ($action) {
             case 'load':
                 $Cart = new Cart();
-                $Cart->cropImages();
                 $out['cart'] = $Cart->processCart();
                 $out['user'] = User::getMyData($_POST);
                 $out['methods'] = [
