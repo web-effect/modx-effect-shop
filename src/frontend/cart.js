@@ -64,47 +64,69 @@ appNodes.forEach((el) => {
 
 /**
  * Добавление в корзину
- * @todo getProductForm()
  */
 document.addEventListener('submit', (e) => {
     if (!e.target.matches('.shop-item form')) return;
     e.preventDefault();
 
-    const form = e.target,
-          button = form.querySelector('.shop-item-button'),
-          qty_el = form.querySelector('[name=qty]'),
-          id_el = form.querySelector('[name=id]'),
-          id = +id_el.value,
-          qty = qty_el ? +qty_el.value : 1,
-          opt_els = form.querySelectorAll('[name^=opt-]') || [],
-          //addons_els = form.querySelectorAll('[name=addons]:checked'),
-          params = { opts: {} };
+    const f = ShopCartApp.getProductForm(e.target);
 
-    //params.addons =  Array.from(addons_els).map(cb => cb.value);
-
-    opt_els.forEach((opt) => {
-        if (opt.value) params.opts[opt.name] = opt.value;
-    })
-    form.classList.remove("is-error");
-    if (Object.values(params.opts).length !== opt_els.length) {
-        form.classList.add("is-error");
-        console.log('не выбраны опции')
+    f.form.classList.remove("is-error");
+    if (Object.values(f.params.opts).length !== f.opt_els.length) {
+        f.form.classList.add("is-error");
+        console.log('не выбраны опции');
         return;
     }
 
-    button && button.classList.add("is-loading");
+    f.button && f.button.classList.add("is-loading");
     
-    ShopCartApp.request('add', { id, qty, params }, () => {
-        button && button.classList.remove("is-loading");
-        button && button.classList.add("is-added");
-        form.classList.add("is-added");
-        if (qty_el) qty_el.value = 1;
+    ShopCartApp.request('add', { id: f.id, qty: f.qty, params: f.params }, () => {
+        f.button && f.button.classList.remove("is-loading");
+        f.button && f.button.classList.add("is-added");
+        f.form.classList.add("is-added");
+        f.form.reset();
+        f.form.dispatchEvent(new Event("change"));
     });
 }, false);
 
 
+/**
+ * Считаем цену
+ */
+document.addEventListener('change', (e) => {
+    const form = e.target.closest('.shop-item form');
+    if (!form) return;
+    
+    const f = ShopCartApp.getProductForm(e.target);
+    if (!f.price_el) return;
 
-/* Кнопки плюс-минус */
+    let price = +f.price_el.dataset.price;
+
+    /** если меняется кол-во подтоваров */
+    f.addon_qty_els && f.addon_qty_els.forEach((el) => {
+        if (el.dataset.addonPrice) {
+            price += +el.value * +el.dataset.addonPrice;
+        }
+    })
+    /** если подтовары чекбоксами или радиокнопками */
+    const prices_plus_els = f.form.querySelectorAll('[data-price-plus]');
+    prices_plus_els && prices_plus_els.forEach((el) => {
+        if (el.type && ['checkbox', 'radio'].includes(el.type) && el.checked) {
+            price += +el.dataset.pricePlus;
+        }
+    })
+
+    price *= f.qty;
+
+    f.price_el.innerHTML = price;
+    DEV && console.log(price);
+
+}, true);
+
+
+/**
+ * Кнопки плюс-минус
+ */
 document.addEventListener('click', (e) => {
     const btn = e.target.closest('.shop-item-plus, .shop-item-minus');
     if (!btn) return;
@@ -114,22 +136,32 @@ document.addEventListener('click', (e) => {
           x = btn.classList.contains('shop-item-minus') ? -1 : 1,
           val = (parseInt(input.value) || 0) + x;
 
-    let min = input.hasAttribute('min') ? +input.min : 1;
-    input.value = val > (min - 1) ? val : min;
+    let min = input.hasAttribute('min') ? +input.min : 1,
+        max = input.hasAttribute('max') ? +input.max : 999;
 
-    const event = new Event("change");
-    input.dispatchEvent(event);
+    if (val < max + 1 && val > min - 1) {
+        input.value = val;
+        input.dispatchEvent(new Event("change"));
+    }
 });
 
 document.addEventListener('blur', (e) => {
     if (!e.target.matches('.shop-item [name*=qty]')) return;
-    let min = e.target.hasAttribute('min') ? +e.target.value.min : 1;
+
+    let min = e.target.hasAttribute('min') ? +e.target.min : 1,
+        max = e.target.hasAttribute('max') ? +e.target.max : 999;
+
     if (!parseInt(e.target.value)) e.target.value = min;
+    if (e.target.value > max) e.target.value = max;
+    if (e.target.value < min) e.target.value = min;
+
+    e.target.dispatchEvent(new Event("change"));
 }, true);
 
 
-
-/* добавить в избранное или к сравнению */
+/**
+ * добавить в избранное или к сравнению
+ */
 document.addEventListener('click', (e) => {
     const btn = e.target.closest('.shop-item-to-favorites');
     if (!btn) return;

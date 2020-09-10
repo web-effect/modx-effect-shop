@@ -27,6 +27,10 @@ $sets = [
         'value' => 0
     ],
 
+    'contact_fields' => [
+        'xtype' => 'textarea',
+        'value' => "fullname==Имя, email==Email, phone==Телефон, address==Адрес, comment==Комментарий"
+    ],
 ];
 
 $data['modSystemSetting'] = [

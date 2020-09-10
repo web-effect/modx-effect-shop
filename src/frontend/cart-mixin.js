@@ -118,13 +118,26 @@ const mixin = {
             out.id_el = form.querySelector('[name=id]');
             out.qty_el = form.querySelector('[name=qty]');
             out.opt_els = form.querySelectorAll('[name^=opt-]') || [];
-            out.addons_els = form.querySelectorAll('[name=addons]:checked');
+            out.addon_qty_els = form.querySelectorAll('[name^=addon-qty-]');
+            out.addon_els = form.querySelectorAll('[name=addon]');
+            out.price_el = form.querySelector('[data-price]');
 
             out.id = +out.id_el.value;
             out.qty = out.qty_el ? +out.qty_el.value : 1;
 
-            out.params = { opts: {} };
-            out.params.addons = Array.from(out.addons_els).map(cb => cb.value);
+            out.params = { opts: {}, addons: {} };
+
+            out.addon_els.forEach((el) => {
+                if (!isNaN(parseInt(el.value))) {
+                    if (el.type && ['checkbox', 'radio'].includes(el.type) && el.checked) {
+                        out.params.addons[+el.value] = 1;
+                    }
+                } 
+            })
+            out.addon_qty_els.forEach((el) => {
+                const name = el.name.split('-');
+                out.params.addons[name[2]] = +el.value;
+            })
 
             out.opt_els.forEach((opt) => {
                 if (opt.value) out.params.opts[opt.name] = opt.value;

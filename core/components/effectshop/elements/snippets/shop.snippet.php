@@ -1,7 +1,10 @@
 <?php
 require MODX_CORE_PATH . 'components/effectshop/autoload.php';
 
-$id = $id ?? $modx->resource->get('id');
+if (empty($id) && $modx->resource) {
+	$id = $modx->resource->get('id');
+}
+$id = $id ?? 0;
 
 switch ($action) {
 	case 'getProducts':

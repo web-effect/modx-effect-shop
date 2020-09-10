@@ -3,7 +3,7 @@
 $data['modMenu'] = [
     [
         'fields' => [
-            'text' => 'Shop',
+            'text' => 'Заказы (Shop)',
             'action' => 'index',
             'parent' => 'topnav',
             'namespace' => $config['component']['namespace'],

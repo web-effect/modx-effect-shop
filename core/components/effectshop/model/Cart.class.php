@@ -86,6 +86,12 @@ class Cart
 				$product['options'][$name] = $opt;
 			}
 		}
+		if (!empty($params['addons'])) {
+			foreach ($params['addons'] as $key => $val) {
+				if (empty($product['addons'][(int)$key])) continue;
+				$product['addons'][(int)$key]['qty'] = (int)$val;
+			}
+		}
 
 		$intersect = $this->checkIntersect($product);
 		if ($intersect === false) {
@@ -214,8 +220,8 @@ class Cart
 			if (
 				$this->cart['items'][$i]['id'] == $product['id']
 				&& $this->cart['items'][$i]['price'] == $product['price']
-				&& serialize($this->cart['items'][$i]['opts']) == serialize($product['opts'])
-				&& serialize($this->cart['items'][$i]['addons_values']) == serialize($product['addons_values'])
+				&& json_encode($this->cart['items'][$i]['opts'] ?? []) == json_encode($product['opts'] ?? [])
+				&& json_encode($this->cart['items'][$i]['addons'] ?? []) == json_encode($product['addons'] ?? [])
 			) {
 				$output = $i;
 				break;
