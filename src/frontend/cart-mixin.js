@@ -62,6 +62,10 @@ const mixin = {
             this.request('qty', { index, qty });
         },
 
+        setValue(key, val) {
+            this.request('setValue', { key, val });
+        },
+
         addonQty(index, addon, plus) {
             const a = this.cart.items[index].addons[addon];
             const qty = +a.qty + plus;

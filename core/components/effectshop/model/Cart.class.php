@@ -48,6 +48,9 @@ class Cart
 			case 'addonQty':
 				$output['product'] = $this->addonQty((int)$_POST['index'], (int)$_POST['addon'], (float)$_POST['qty']);
 				break;
+			case 'setValue':
+				$this->cart[$_POST['key']] = $_POST['val'];
+				break;
 			case 'clean':
 				$this->clean();
 				break;
@@ -189,6 +192,13 @@ class Cart
 		$order['delivery_price'] = $order['delivery_price'] ?? 0;
 		$discount = $order['price'] * (((float)$order['discount']) / 100);
 		$order['total_price'] = $order['price'] + ((float)$order['delivery_price']) - $discount;
+
+		$fromEvent = $this->modx->invokeEvent('ShopCartAfterProcess', [
+			'cart' => $order,
+		]);
+		if (!empty($fromEvent[0])) {
+			$order = $fromEvent[0];
+		}
 
 		return $order;
 	}
