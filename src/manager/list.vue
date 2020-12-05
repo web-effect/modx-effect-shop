@@ -35,6 +35,7 @@
 
 				<tr>
 					<th></th>
+					<th></th>
 					<template v-for="col in columns">
 					<th @click="sorting(col.name)" class="is-sortable"  :width="col.width || 'auto'">
 						<div :class="{ 'is-numeric' : col.numeric }" class="th-wrap">
@@ -47,7 +48,7 @@
 
 				<tr>
 					<th></th>
-					
+					<th></th>
 					<th>
 						<b-datepicker range
 							:value="getDates(filter.dates)"
@@ -84,7 +85,9 @@
 			
 			<tbody>
 				<tr v-for="row,index in rows">
-				
+					<td class="checkbox-cell">
+						<b-checkbox></b-checkbox>
+					</td>
 					<td>
 						<b-button tag="router-link" :to="'list/' + row.id"
 							icon-left="eye"
@@ -128,7 +131,7 @@
 							</div>
 						</div>
 					</td>
-
+					
 				</tr>
 			
 			</tbody>

@@ -6,7 +6,9 @@
 //var_dump($modx->map['modPluginEvent']);
 $pconfig=[
     'events'=>[
-        'ShopCartAfterProcess' => ['groupname' => 'Shop']
+        'ShopCartBeforeProcess' => ['groupname' => 'Shop'],
+        'ShopCartAfterProcess' => ['groupname' => 'Shop'],
+        'ShopOrderStatusChange' => ['groupname' => 'Shop']
     ],
     'plugins'=>[
         /*'Sample'=>[

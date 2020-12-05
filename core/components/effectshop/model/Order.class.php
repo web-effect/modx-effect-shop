@@ -18,7 +18,6 @@ class Order
         $this->modx = &$modx;
         $this->modx->addPackage('effectshop', MODX_CORE_PATH . 'components/effectshop/model/');
         $this->cfg = Params::cfg();
-        $this->shk = $this->cfg['shk'] ?: false; //использовать ли Shopkeeper для заказов
     }
 
 
@@ -72,40 +71,32 @@ class Order
             $order['userid'] = $this->modx->user->id;
         }
         
-
-        //собираем контакты, в режиме shk не нужно
-        if (!$this->shk) {
-            foreach ($this->cfg['contact_fields'] as $name => $label) {
-                if(!empty($post[$name])) {
-                    $order['contacts'][$name] = $post[$name];
-                }
+        //собираем контакты
+        foreach ($this->cfg['contact_fields'] as $name => $label) {
+            if(!empty($post[$name])) {
+                $order['contacts'][$name] = $post[$name];
             }
         }
-        
-        
+ 
         $save = $this->saveOrder($order);
         if ($save[0] != 1) return [0, ($save[1] ?: 'Ошибка '.__LINE__)];
         $order = $save[1];
-
-
-        $pay_error = false;
         
-        /*
-        if ($order['payment'] == 'sberbank') {
-            $pay = Pay::sberbank($order);
-            if (!$pay[0]) {
-                $pay_error = $pay['error'];
-                $order['pay_error'] = "Ошибка онлайн-оплаты:" . $pay_error;
-                //return [0, 'Ошибка онлайн-оплаты: ' . $pay['error']];
-            } else {
-                $order['options']['pay_link'] = $pay['pay_link'];
-                $order['options']['pay_id'] = $pay['pay_id'];
+        // оплата
+        if (file_exists(MODX_CORE_PATH . 'components/effectpay/autoload.php')) {
+            require MODX_CORE_PATH . 'components/effectpay/autoload.php';
+            $payResp = \Pay::payment($order['id'], $order['payment']);
+            if ($payResp['method']) {
+                $order['options']['pay_link'] = $payResp['pay_link'];
+                $order['options']['pay_key'] = $payResp['pay_key'];
+                if ($payResp['error']) {
+                    $order['options']['pay_error'] = $payResp['error'];
+                }
+                $order['status'] = $payResp['error'] ? self::ST_PAY_ERROR : self::ST_PAY_WAIT;
+                $this->saveOrder($order, $order['id']);
             }
+        }
 
-            $order['status'] = $pay_error ? self::ST_PAY_ERROR : self::ST_PAY_WAIT;
-            $this->saveOrder($order, $order['id']);		
-        }*/
-        
         $mail = Mail::send([
             'to' => $this->cfg['mail_to'],
             'subject' => "На сайте SITENAME сделан новый заказ",
@@ -146,20 +137,6 @@ class Order
             return [0, "Не передан состав заказа или сумма: ".__LINE__];
         }
 
-        if ($this->shk) {
-            $Shopkeeper = new Shk();
-            if ($id) {
-                $new_id = $Shopkeeper->updateOrder($id, $order);
-            } else {
-                $new_id = $Shopkeeper->saveOrder($order);
-            }
-            if (!$new_id) return [0, 'Ошибка сохр. заказа '.__LINE__];
-            $order = $this->getOne($new_id);
-            if (!$order) return [0, 'Ошибка сохр. заказа '.__LINE__];
-            return [1, $order];
-        }
-
-    
         $array = [
             'payment' => $order['payment'] ?: '',
             'delivery' => $order['delivery'] ?: '',
@@ -210,11 +187,6 @@ class Order
      */
     public function getOne($id)
     {
-        if ($this->shk) {
-            $Shopkeeper = new Shk();
-            return $Shopkeeper->getOrder($id);
-        }
-        
         $orders = $this->getAll([
             'id' => $id,
         ]);

@@ -69,6 +69,12 @@
 					</b-select>
 				</b-field>
 				
+				<div v-if="order.options && order.options.pay_error"
+					class="notification is-danger"
+				>
+					{{ order.options.pay_error }}
+				</div>
+
 				<b-field label="Доставка">
 					<b-select v-model="order.delivery" expanded>
 						<option

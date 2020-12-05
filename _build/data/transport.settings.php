@@ -1,9 +1,6 @@
 <?php
 
 $sets = [
-    'shk' => [
-        'value' => 0
-    ],
     'product_tmpls' => [
         'value' => 7
     ],

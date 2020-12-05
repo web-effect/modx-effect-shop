@@ -164,6 +164,13 @@ class Cart
 	{
 		$order = $order ?: $this->cart;
 
+		$fromEventBefore = $this->modx->invokeEvent('ShopCartBeforeProcess', [
+			'cart' => $order,
+		]);
+		if (!empty($fromEventBefore[0])) {
+			$order = $fromEventBefore[0];
+		}
+
 		$order['price'] = 0;
 		$order['qty'] = 0;
 		
@@ -193,11 +200,11 @@ class Cart
 		$discount = $order['price'] * (((float)$order['discount']) / 100);
 		$order['total_price'] = $order['price'] + ((float)$order['delivery_price']) - $discount;
 
-		$fromEvent = $this->modx->invokeEvent('ShopCartAfterProcess', [
+		$fromEventAfter = $this->modx->invokeEvent('ShopCartAfterProcess', [
 			'cart' => $order,
 		]);
-		if (!empty($fromEvent[0])) {
-			$order = $fromEvent[0];
+		if (!empty($fromEventAfter[0])) {
+			$order = $fromEventAfter[0];
 		}
 
 		return $order;

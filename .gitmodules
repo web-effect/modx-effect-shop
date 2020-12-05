@@ -1,6 +1,6 @@
 [submodule "_build/includes/builder"]
 	path = _build/includes/builder
 	url = https://github.com/web-effect/modx-packageBuilder
-[submodule "assets/components/effectshop/effect-lib"]
-	path = assets/components/effectshop/effect-lib
-	url = https://github.com/der-leksey/effect-lib.git
+[submodule "assets/components/effectshop/vendor/effect-ui"]
+	path = assets/components/effectshop/vendor/effect-ui
+	url = https://github.com/der-leksey/effect-ui.git

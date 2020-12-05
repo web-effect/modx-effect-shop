@@ -10,13 +10,8 @@ class Shop
     {
 		$out = [];
 		$cfg = Params::cfg();
-		if (!$cfg['shk']) {
-			$settings = Params::getSettings();
-		} else {
-			$settings = Shk::getSettings();
-		}
-        
-
+		$settings = Params::getSettings();
+	
         switch ($action) {
             case 'load':
                 $Cart = new Cart();

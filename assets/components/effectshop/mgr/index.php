@@ -1,4 +1,6 @@
 <?php
+	// Страничка для управления заказами без админки
+	// Не готова
 	exit;
 	define('MODX_API_MODE', true);
 	require_once($_SERVER['DOCUMENT_ROOT'] . '/index.php');

@@ -24,7 +24,6 @@ const mixin = {
     data,
     delimiters: ['(#', '#)'],
     methods: {
-
         request(action, data = {}, callback) {
             this.loading.cart = true;
 
@@ -64,6 +63,7 @@ const mixin = {
 
         setValue(key, val) {
             this.request('setValue', { key, val });
+            console.log(key, val);
         },
 
         addonQty(index, addon, plus) {

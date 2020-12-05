@@ -18,3 +18,5 @@ php7.2 build.transport.php
 
 git add -A && git commit -m ''
 git push origin master
+
+git pull origin master

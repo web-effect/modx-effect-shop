@@ -33,7 +33,6 @@ class Params
 
 		$array['mail_to'] = self::getOpt('mail_to', '');
 
-		$array['shk'] = self::getOpt('effectshop.shk', 0);
 		$array['thumb'] = self::getOpt('effectshop.thumb', 'w=110&h=110');
 		$array['order_report_tpl'] = self::getOpt('effectshop.order_report_tpl', 'shop-order-report');
 
@@ -127,6 +126,7 @@ class Params
 		$obj->set('value', $value);
 		
 		if($obj->save()) {
+			$modx->cacheManager->clearCache();
 			return [1, true];
 		} else {
 			return [0, 'Ошибка '.__LINE__];
