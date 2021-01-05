@@ -14,6 +14,7 @@ export default {
 			{ name: 'contacts__email', label: 'Email' },
 		],
 		loading: true,
+		checked: [],
 
 		page: 1,
 		total: 0,
@@ -24,7 +25,7 @@ export default {
 			sortField: 'date',
 			sortDir: 'DESC',
 			dates: [],
-		},		
+		},
 	}},
 	
 	methods: {
@@ -69,14 +70,14 @@ export default {
 			const filter = this.cleanFilter();
 			this.loading = true;
 			this.$http('order', 'getAll', filter)
-				.then((data) => {
-					this.rows = data.rows || [];
-					this.total = data.total;
-					this.limit = data.limit;
-					this.loading = false;
-					toUrl && this.toUrl(filter);
-					console.log(data);
-				});
+			.then((data) => {
+				this.rows = data.rows || [];
+				this.total = data.total;
+				this.limit = data.limit;
+				this.loading = false;
+				toUrl && this.toUrl(filter);
+				console.log(data);
+			});
 		},
 		
 		setDates(val) {
@@ -86,7 +87,23 @@ export default {
         getDates(val) {
             if (!val.length) return [];
             return [new Date(val[0]*1000), new Date(val[1]*1000)];
-        },
+		},
+		
+		remove() {
+			this.$buefy.dialog.confirm({
+                message: 'Удалить выбранные заказы?',
+                onConfirm: () => {
+					this.loading = true;
+					this.$http('order', 'remove', { ids: this.checked })
+					.then((data) => {
+						this.checked = [];
+						this.request();
+						console.log(data);
+					});
+				},
+                cancelText: 'Отмена'
+            });
+		}
 	},
 	
 	created() {

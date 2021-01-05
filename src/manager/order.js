@@ -79,7 +79,7 @@ export default {
 			
 			this.$http('order', 'changeStatus', data)
 				.then((data) => {
-					this.loadOrder(data[1]);
+					data[0] && this.loadOrder(data[1]);
 					this.$buefy.toast.open({
 						message: data[0] ? 'Статус обновлён' : (data[1] || 'Ошибка'),
 						type: data[0] ? 'is-success' : 'is-danger',

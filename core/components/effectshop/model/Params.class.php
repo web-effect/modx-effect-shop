@@ -14,6 +14,7 @@ class Params
 	{
 		switch ($action) {
 			case 'update':
+				if (!Shop::isManager()) return [0, 'Доступ запрещён'];
 				return self::update($_POST);
 
 			default:	

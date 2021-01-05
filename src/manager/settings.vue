@@ -10,40 +10,41 @@
     </div>
 
     <form @submit.prevent="saveSetting()">
-
         <template v-if="sets[$route.params.tab]">
+            <b-table :data="sets[$route.params.tab]" :key="$route.params.tab" draggable>
+                <b-table-column field="key" label="Ключ" width="180"
+                    v-slot="props"
+                >
+                    <b-field :key="props.index">
+                        <b-input required v-model="props.row.key"></b-input>
+                    </b-field>
+                </b-table-column>
+                
+                <b-table-column field="label" label="Название"
+                    v-slot="props"
+                >
+                    <b-input v-model="props.row.label"></b-input>
+                </b-table-column>
 
-            <b-table :data="sets[$route.params.tab]" :key="$route.params.tab">
-                <template slot-scope="props">
+                <!-- <b-table-column :visible="$route.params.tab == 'statuses'"
+                    field="mail" label="Письмо" width="70" centered
+                    v-slot="props"
+                >
+                    <b-checkbox v-model="props.row.mail"></b-checkbox>
+                </b-table-column> -->
 
-                    <b-table-column field="key" label="Ключ" width="180">
-                        <b-field :key="props.index">
-                            <b-input required v-model="props.row.key"></b-input>
-                        </b-field>
-                    </b-table-column>
-                    
-                    <b-table-column field="label" label="Название">
-                        <b-input v-model="props.row.label"></b-input>
-                    </b-table-column>
-
-
-                    <b-table-column :visible="$route.params.tab == 'statuses'"
-                        field="mail" label="Письмо" width="70" centered
-                    >
-                        <b-checkbox v-model="props.row.mail"></b-checkbox>
-                    </b-table-column>
-
-                    <b-table-column :visible="$route.params.tab == 'statuses'"
-                        field="color" label="Цвет" width="70" centered
-                    >
-                        <b-input type="color" v-model="props.row.color"></b-input>
-                    </b-table-column>
-                    
-                    <b-table-column custom-key="delete" width="70" centered>
-                        <a @click="remove(props.index)" class="delete"></a>
-                    </b-table-column>
-
-                </template>
+                <b-table-column :visible="$route.params.tab == 'statuses'"
+                    field="color" label="Цвет" width="70" centered
+                    v-slot="props"
+                >
+                    <b-input type="color" v-model="props.row.color"></b-input>
+                </b-table-column>
+                
+                <b-table-column custom-key="delete" width="70" centered
+                    v-slot="props"
+                >
+                    <a @click="remove(props.index)" class="delete"></a>
+                </b-table-column>
             </b-table>
             <div class="level"></div>
         </template>

@@ -9,7 +9,6 @@
 	.datepicker.control {
 		min-width: 14em;
 	}
-
 	.app-list .status-cell {
 		display: flex;
 		align-items: center;
@@ -17,7 +16,8 @@
 	.app-list .status-cell .status-color {
 		margin-right: .6em;
 		margin-left: 0;
-		width: .8em; height: .8em;
+		width: .8em;
+		height: .8em;
 	}
 </style>
 
@@ -25,14 +25,11 @@
 
 <template>
 <main class="container app-list">
-<div class="b-table" :class="{ 'is-loading': loading }">
-	
+<div class="b-table">
+	<b-loading v-model="loading" :is-full-page="false"></b-loading>
 	<div class="table-wrapper">
-		
 		<table class="table has-mobile-cards">
-					
 			<thead>
-
 				<tr>
 					<th></th>
 					<th></th>
@@ -80,14 +77,14 @@
 						<b-input @input="addFilter('contacts__email', $event, 1)" v-model.trim="filter['contacts__email']"></b-input>
 					</th>
 				</tr>
-
 			</thead>
 			
 			<tbody>
 				<tr v-for="row,index in rows">
 					<td class="checkbox-cell">
-						<b-checkbox></b-checkbox>
+						<b-checkbox :native-value="row.id" v-model="checked"></b-checkbox>
 					</td>
+					
 					<td>
 						<b-button tag="router-link" :to="'list/' + row.id"
 							icon-left="eye"
@@ -105,8 +102,6 @@
 							{{ row.status_name }}
 						</div>
 					</td>
-
-	
 
 					<td :data-label="columns[2].label">
 						{{ row.payment_name }}
@@ -131,11 +126,8 @@
 							</div>
 						</div>
 					</td>
-					
 				</tr>
-			
 			</tbody>
-			
 		</table>
 		
 		<template v-if="!rows.length">
@@ -144,18 +136,24 @@
 				<p>Ничего не найдено</p>
 			</div>
 		</template>
-	
 	</div>
 	
-	<div class="level">	  
+	<div v-if="rows.length" class="level">	  
 		<b-pagination
 			@change="paginate($event)"
 			:total="total"
 			:current.sync="page"
 			:per-page="limit"
 		></b-pagination>
-	</div>
 
+		<div>
+			Всего заказов: {{ total }}
+		</div>
+
+		<b-button @click="remove()" type="is-danger is-light" :disabled="!checked.length">
+			Удалить выбранные заказы
+		</b-button>
+	</div>
 
 </div>
 </main>

@@ -33,6 +33,11 @@ class Shop
     }
 
 
+	public static function isManager()
+	{
+		return $_SESSION['modx.user.contextTokens']['mgr'] ? true: false;
+	}
+
     /**
      * 
      */

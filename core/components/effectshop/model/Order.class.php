@@ -26,26 +26,29 @@ class Order
      */
     public function request($action)
     {
-
         $output = [];
 
         switch ($action) {
             case 'sendForm':
                 return $this->sendForm($_POST);
-            case 'getAll':
-                return $this->getAll($_POST);
-            case 'getOne':
-                return $this->getOne((int)$_POST['id']);
             case 'getMyOrders':
                 return $this->getMyOrders();
+            case 'getAll':
+                if (!Shop::isManager()) return [0, 'Доступ запрещён'];
+                return $this->getAll($_POST);if (!Shop::isManager()) return [0, 'Доступ запрещён'];
+            case 'getOne':
+                if (!Shop::isManager()) return [0, 'Доступ запрещён'];
+                return $this->getOne((int)$_POST['id']);
             case 'update':
-                // todo проверка прав
+                if (!Shop::isManager()) return [0, 'Доступ запрещён'];
                 return $this->saveOrder($_POST['order'], (int)$_POST['id']);
+            case 'remove':
+                if (!Shop::isManager()) return [0, 'Доступ запрещён'];
+                return $this->remove($_POST['ids']);
             case 'changeStatus':
                 // todo проверка прав
                 $status = $_POST['status'] ?? self::ST_CANCELED;
-                return $this->changeStatus((int)$_POST['id'], $status, $_POST['comment'] ?? '');
-
+                return $this->changeStatus((int)$_POST['id'], $status, $_POST['comment'] ?? '', true);
             default:	
         }
     }
@@ -92,7 +95,12 @@ class Order
                 if ($payResp['error']) {
                     $order['options']['pay_error'] = $payResp['error'];
                 }
-                $order['status'] = $payResp['error'] ? self::ST_PAY_ERROR : self::ST_PAY_WAIT;
+                $status = $payResp['error'] ? self::ST_PAY_ERROR : self::ST_PAY_WAIT;
+                $order['status'] = $status;
+                $order['history'][] = [
+                    'status' => $status,
+                    'date' => strftime('%Y-%m-%d %H:%M:%S'),
+                ];
                 $this->saveOrder($order, $order['id']);
             }
         }
@@ -159,6 +167,10 @@ class Order
         if(!$id) {
             //$array['date'] = strftime('%Y-%m-%d %H:%M:%S');
             $array['status'] = 'new';
+            $array['history'][] = [
+                'status' => 'new',
+                'date' => strftime('%Y-%m-%d %H:%M:%S'),
+            ];
             $obj = $this->modx->newObject('shop_order');
             $obj->fromArray($array);
         } else {
@@ -319,7 +331,7 @@ class Order
     /**
      * 
      */
-    public function changeStatus(int $id, string $status, string $comment = '')
+    public function changeStatus(int $id, string $status, string $comment = '', bool $sendMail = false)
     {
         $order = $this->getOne($id);
         $order['status'] = $status;
@@ -331,10 +343,45 @@ class Order
         ];
 
         $save = $this->saveOrder($order, $id);
+        if (!$save[0]) {
+            return [
+                0 => 0, 1 => 'Ошибка '.__LINE__,
+            ];
+        }
+        $order = $save[1];
+        
+        if ($sendMail) {
+            $mail = Mail::send([
+                'to' => $order['contacts']['email'],
+                'subject' => "Изменён статус вашего заказа на сайте SITENAME",
+                'pls' => [
+                    'mode' => 'status',
+                    'comment' => $comment,
+                    'order' => $order,
+                ]
+            ]);
+            if (!$mail[0]) {
+                return [
+                    0 => 0, 1 => $mail[1] ?: 'Ошибка '.__LINE__,
+                ];
+            }
+        }
         return [
-            0 => $save[0],
-            1 => $save[1] ?? 'Ошибка '.__LINE__,
+            0 => 1, 1 => $save[1],
         ];
     }
 
+
+    /**
+     * 
+     */
+    private static function remove(array $ids)
+    {
+        global $modx;
+        foreach ($ids as $id) {
+            $obj = $modx->getObject('shop_order', $id);
+            $obj->remove();
+        }
+        return [1];
+    }
 }
