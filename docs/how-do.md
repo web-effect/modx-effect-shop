@@ -32,3 +32,13 @@ document.addEventListener("shop-catalog-update", function() {
 	lazyLoadInstance.update()
 });
 ```
+
+## Удаление поля формы после заказа
+```js
+document.addEventListener("shop-cart-order", function(e) {
+    ShopCartApp.form.cutlery = '';
+});
+document.addEventListener("shop-cart-load", function(e) {
+    ShopCartApp.form.cutlery = ShopCartApp.cart.cutlery || '';
+});
+```
