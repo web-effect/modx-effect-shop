@@ -102,7 +102,7 @@ const mixin = {
                         this.error = data || 'Ошибка';
                     }
                     this.loading.form = false;
-                    //window.scrollTo({ top: 0 });
+                    window.scrollTo({ top: 0 });
 
                     const event = new CustomEvent('shop-cart-order', {
                         detail: { order: this.lastOrder }

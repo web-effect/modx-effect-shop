@@ -64,13 +64,13 @@ if (appNodes.length) {
 
         page: +params.get('page') || 1,
         view: Cookies.get('shop_view') || 'grid',
-        sort: Cookies.get('shop_sort') || 'pagetitle',
+        sort: Cookies.get('shop_sort') || '',
     };
 
 
     const methods = {
 
-        request(resetPage) {
+        request(resetPage, showMore = false) {
             this.isFiltered = !!Object.entries(this.filterQuery).length;
 
             catalogEl.classList.add('is-loading');
@@ -99,7 +99,7 @@ if (appNodes.length) {
                     const newDiv = document.createElement("div");
                     newDiv.innerHTML = resp.html;
                     const itemsNode = newDiv.querySelector('.shop-catalog-items');
-                    catalogEl.innerHTML = "";
+                    if (!showMore) catalogEl.innerHTML = "";
                     catalogEl.insertAdjacentHTML('beforeend', itemsNode.innerHTML);
                     
                     this.total = resp.total;
@@ -139,6 +139,12 @@ if (appNodes.length) {
             this.filterVisible = false;
         },
 
+        showMore() {
+            if (this.page >= this.pages) return;
+            this.page++;
+            this.request(false, true);
+        },
+
         reset() {
             //this.isFiltered = false;
             for (let f in this.filterForm) {
@@ -151,6 +157,11 @@ if (appNodes.length) {
 
     };
 
+    const computed = {
+        pages() {
+            return Math.ceil(this.total / this.limit);
+        }
+    };
 
     if (appNodes.length) {
         const ShopCatalogApp = new Vue({
@@ -174,6 +185,7 @@ if (appNodes.length) {
             el,
             data,
             methods,
+            computed,
             delimiters: ['(#', '#)'],
         });
     });
