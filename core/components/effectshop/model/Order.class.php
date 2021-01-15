@@ -105,6 +105,13 @@ class Order
             }
         }
 
+        $orderFromEvent = $this->modx->invokeEvent('ShopOrderBeforeSendEmails', [
+			'order' => $order,
+		]);
+		if (!empty($orderFromEvent[0])) {
+			$order = $orderFromEvent[0];
+		}
+
         $mail = Mail::send([
             'to' => $this->cfg['mail_to'],
             'subject' => "На сайте SITENAME сделан новый заказ",

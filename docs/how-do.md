@@ -34,11 +34,46 @@ document.addEventListener("shop-catalog-update", function() {
 ```
 
 ## Удаление поля формы после заказа
+Здесь нужно было добавлять цену за кол-во приборов (поле cutlery). Заходим в корзину после заказа — cutlety автозаполняется, удаляем.
 ```js
 document.addEventListener("shop-cart-order", function(e) {
     ShopCartApp.form.cutlery = '';
 });
 document.addEventListener("shop-cart-load", function(e) {
     ShopCartApp.form.cutlery = ShopCartApp.cart.cutlery || '';
+});
+```
+
+## Прикрепить файлы к письмам
+```php
+switch ($modx->event->name) {
+    case 'ShopOrderBeforeSendEmails':
+        $order['files_path'] = MODX_BASE_PATH . 'assets/web/css/';
+        $order['files'][] = 'reset.css';
+        $modx->event->output($order);
+        break;
+}
+```
+
+## Скидка, если введён ИНН
+```html
+<input class="input" type="text" name="inn" v-model="form.inn" @change="setValue('inn', $event.target.value)">
+```
+```php
+switch ($modx->event->name) {
+    case 'ShopCartBeforeProcess':
+        if (!empty($cart['inn'])) {
+            $cart['discount'] = 10;
+        }
+        $modx->event->output($cart);
+        break;
+}	
+```
+заходим в корзину, инн автозаполнился с предыдущего заказа, но в shop_cart на сервере его ещё нет — добавляем
+```js
+document.addEventListener("shop-cart-load", function(e) {
+	if (ShopCartApp.$data.form.inn && !ShopCartApp.$data.cart.inn) {
+		ShopCartApp.setValue('inn', ShopCartApp.$data.form.inn);
+	}
 });
 ```

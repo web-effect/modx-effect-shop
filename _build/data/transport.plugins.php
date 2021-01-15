@@ -8,7 +8,8 @@ $pconfig=[
     'events'=>[
         'ShopCartBeforeProcess' => ['groupname' => 'Shop'],
         'ShopCartAfterProcess' => ['groupname' => 'Shop'],
-        'ShopOrderStatusChange' => ['groupname' => 'Shop']
+        'ShopOrderBeforeSendEmails' => ['groupname' => 'Shop'],
+        'ShopOrderStatusChange' => ['groupname' => 'Shop'],
     ],
     'plugins'=>[
         /*'Sample'=>[

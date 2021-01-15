@@ -13,6 +13,10 @@ document.addEventListener("shop-cart-request", function(e) {
 ```
 
 ## События для плагинов
-Плагин должен возвращать `$modx->event->output($cart);`
+
 * ShopCartBeforeProcess ($cart)
 * ShopCartAfterProcess ($cart)
+Плагин должен возвращать `$modx->event->output($cart);`
+
+* ShopOrderBeforeSendEmails ($order)
+Плагин должен возвращать `$modx->event->output($order);`

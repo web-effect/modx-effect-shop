@@ -134,13 +134,21 @@
 					<a target="_blank" :href="props.row.url"
 						:class="{opacity: !productsIds.includes(props.row.id)}"
 					>{{ props.row.name }}</a>
+					
+					<!-- Опции -->
+					<ul v-if="props.row.options">
+						<li v-for="opt in props.row.options" class="order-opt-item">
+							<small v-html="opt"></small>
+						</li>
+					</ul>
+
 					<!-- доп. товары -->
 					<ul v-if="props.row.addons">
 						<li v-for="add in props.row.addons" class="order-add-item">
 							<div class="order-add-item-name"
 								:class="{ 'has-text-grey-light' : !add.qty}"
 							>
-								{{add.name}}
+								{{ add.name }}
 							</div>
 							
 							<b-field>

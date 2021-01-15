@@ -43,6 +43,7 @@ class Catalog
 
     /**
      * Получить все поля товара
+     * Возможно, выпилить
      */
     public static function getOneFull(int $id)
     {
@@ -109,12 +110,16 @@ class Catalog
         $resFields = array_keys($modx->getFields('modResource'));
         $tvsFields = self::tvsMap();
         
-        
         $where = array_merge([
             'published = 1',
             'deleted = 0',
-            'template IN (' . implode(',', $cfg['product_tmpls']) .')'
         ], $props['where'] ?? []);
+        
+        // если получаем по id — не проверяем шаблон
+        // м. б. актуально при добавлении в корзину подтовара с другим шаблоном
+        if (empty($props['id'])) {
+            $where[] = 'template IN (' . implode(',', $cfg['product_tmpls']) .')';
+        }
 
         
         /* сортировка */

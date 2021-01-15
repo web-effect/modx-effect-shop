@@ -14,7 +14,7 @@ $sets = [
         'value' => 'w=110&h=110'
     ],
     'order_report_tpl' => [
-        'value' => 'shop-order-report'
+        'value' => 'shop-order-report-default'
     ],
 
     'filter_exclude' => [

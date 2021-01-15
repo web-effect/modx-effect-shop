@@ -45,7 +45,14 @@
                     {foreach $order.items as $k=>$i}
                         <tr class="cart__row">
                             <td {$css_td}>{$k+1}</td>
-                            <td {$css_td}>{$i.name}</td>
+                            <td {$css_td}>
+                                <div>{$i.name}</div>
+                                {if $i.options}
+                                    {foreach $i.options as $opt}
+                                        <div><small>{$opt}</small></div>
+                                    {/foreach}
+                                {/if}
+                            </td>
                             <td {$css_td}>{$i.qty}</td>
                             <td {$css_td}>{($i.initial_price ?: $i.price)|num_format} руб.</td>
                         </tr>
@@ -61,7 +68,6 @@
                                 {/if}
                             {/foreach}
                         {/if}
-
                     {/foreach}
                 </tbody>
                 

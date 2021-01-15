@@ -73,3 +73,18 @@ TODO: добавить подтовары
 	Итоговая стоимость: <b> (# cart.total_price | numFormat #) &#x20bd;</b>
 </div>
 ```
+
+## Добавить / удалить подтовар по чекбоксу
+```html
+<ul>
+	<li v-for="add,a in item.addons">
+		<label>
+			<input type="checkbox"
+				@input="request('addonQty', { index:n, addon:a, qty: (add.qty ? 0 : 1) })"
+				:checked="add.qty"
+			>
+			(# add.name #)
+		</label>
+	</li>
+</ul>
+```

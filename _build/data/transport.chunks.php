@@ -1,6 +1,6 @@
 <?php
 $sconfig = [
-    'shop-order-report' => [],
+    'shop-order-report-default' => [],
 ];
 
 $name = 'effectshop';

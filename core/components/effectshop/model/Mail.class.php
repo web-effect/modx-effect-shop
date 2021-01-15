@@ -35,7 +35,7 @@ class Mail
 		$errors = [];
 
 		$mails = (gettype($input['to']) == 'array') ? $input['to'] : (explode(',', $input['to']));
-		foreach($mails as $k=>$mail) {
+		foreach ($mails as $k=>$mail) {
 			if (!filter_var(trim($mail), FILTER_VALIDATE_EMAIL)) {
                 $errors[] = "Email {$mail} неверный";
                 unset($mails[$k]);
@@ -71,12 +71,12 @@ class Mail
 		foreach($mails as $k=>$mail) {
 			$modx->mail->address('to', trim($mail));
 		}
-		
 
-		if(!empty($input['files'])) {
-			if (!empty($input['files_path'])) {
-				foreach($input['files'] as $file) {
-					$modx->mail->mailer->addAttachment($input['files_path'] . $file);
+		$order = $input['pls']['order'];
+		if (!empty($order['files'])) {
+			if (!empty($order['files_path'])) {
+				foreach($order['files'] as $file) {
+					$modx->mail->mailer->addAttachment($order['files_path'] . $file);
 				}
 			}
 		} else if(!empty($_FILES)) {

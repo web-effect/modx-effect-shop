@@ -63,7 +63,7 @@ const mixin = {
 
         setValue(key, val) {
             this.request('setValue', { key, val });
-            console.log(key, val);
+            DEV && console.log(key, val);
         },
 
         addonQty(index, addon, plus) {
@@ -97,17 +97,16 @@ const mixin = {
                         this.status = 'success';
                         this.cart = { items: {}, qty: 0 };
                         this.form.comment =  this.form.message = '';
-                        this.lastOrder = data[1];					
+                        this.lastOrder = data[1];	
+                        window.scrollTo({ top: 0 });	
+                        const event = new CustomEvent('shop-cart-order', {
+                            detail: { order: this.lastOrder }
+                        });
+                        document.dispatchEvent(event);
                     } else {
                         this.error = data || 'Ошибка';
                     }
                     this.loading.form = false;
-                    window.scrollTo({ top: 0 });
-
-                    const event = new CustomEvent('shop-cart-order', {
-                        detail: { order: this.lastOrder }
-                    });
-                    document.dispatchEvent(event);
                 });
         },
 
