@@ -123,6 +123,7 @@ const mixin = {
             out.opt_els = form.querySelectorAll('[name^=opt-]') || [];
             out.addon_qty_els = form.querySelectorAll('[name^=addon-qty-]');
             out.addon_els = form.querySelectorAll('[name=addon]');
+            out.prices_plus_els = form.querySelectorAll('[data-price-plus]');
             out.variation_el = form.querySelector('[name=variation]:checked'); // вариативный, радиокнопки
             out.price_el = form.querySelector('[data-price]');
 
@@ -133,7 +134,7 @@ const mixin = {
 
             if (out.variation_el) {
                 out.variation = out.variation_el.value || '';
-                out.variation_price = out.variation_el.dataset.variationPrice || 0;
+                out.variation_price = +out.variation_el.dataset.variationPrice || 0;
                 out.params.variation = out.variation
             }
 

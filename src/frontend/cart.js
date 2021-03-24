@@ -120,8 +120,7 @@ document.addEventListener('change', (e) => {
         }
     })
     /** если подтовары чекбоксами или радиокнопками */
-    const prices_plus_els = f.form.querySelectorAll('[data-price-plus]');
-    prices_plus_els && prices_plus_els.forEach((el) => {
+    f.prices_plus_els && f.prices_plus_els.forEach((el) => {
         if (el.type && ['checkbox', 'radio'].includes(el.type) && el.checked) {
             price += +el.dataset.pricePlus;
         }
