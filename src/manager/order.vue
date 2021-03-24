@@ -135,6 +135,11 @@
 						:class="{opacity: !productsIds.includes(props.row.id)}"
 					>{{ props.row.name }}</a>
 					
+					<!-- Вариация -->
+					<div v-if="props.row.variation && props.row.variations && props.row.variations[props.row.variation]">
+						{{ props.row.variations[props.row.variation].name }}
+					</div>
+
 					<!-- Опции -->
 					<ul v-if="props.row.options">
 						<li v-for="opt in props.row.options" class="order-opt-item">
