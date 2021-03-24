@@ -37,9 +37,7 @@
 				</ul>
 			</template>
 
-
 			<div v-if="nothing" class="search-empty">Ничего не найдено</div>
-
 
 		</div>
 
@@ -76,7 +74,8 @@ export default {
 		},
 		
 		request(query) {
-			this.$shop.http('catalog', 'liveSearch', { query })
+			// Без encodeURIComponent проблема с плюсом в поиске
+			this.$shop.http('catalog', 'liveSearch', { query: encodeURIComponent(query) })
 				.then((resp) => {
 					DEV && console.log(resp);
 					const rows = resp.rows || [];

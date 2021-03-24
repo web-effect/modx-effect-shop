@@ -6,6 +6,7 @@ class User
 	/**
 	 * 
 	 */
+	/*
 	public static function request($action)
 	{
 		switch ($action) {
@@ -20,13 +21,13 @@ class User
 				
 			default:	
 		}
-	}
+	}*/
 
 
 	/**
 	 * Логин
 	 */
-	public static function login($props)
+	/*public static function login($props)
 	{
 		global $modx;
 
@@ -46,13 +47,13 @@ class User
 		} else {
 			return [1];
 		}
-	}
+	}*/
 	
 
 	/**
 	 * Выход
 	 */
-	public static function logout()
+	/*public static function logout()
 	{
 		global $modx;
 
@@ -62,7 +63,7 @@ class User
 		} else {
 			return [1];
 		}
-	}
+	}*/
 
 
 	/**
@@ -70,8 +71,8 @@ class User
 	 */
 	public static function getMyData($props)
 	{
-		//$cache = Shop::fromCache('user_', $props);
-		//if ($cache) return $cache;
+		$cache = Shop::fromCache('user_', $props);
+		if ($cache) return $cache;
 
 		global $modx;
 		$out = [];
@@ -94,7 +95,7 @@ class User
 			}
 		}
 
-		//Shop::toCache($out, 'user_', $props);
+		Shop::toCache($out, 'user_', $props);
 		return $out;
 	}
 	
@@ -102,7 +103,7 @@ class User
 	/**
 	 * Обновление данных пользователя
 	 */
-	public function update(array $data)
+	/*public function update(array $data)
 	{
 		global $modx;
 		$id = 0;
@@ -130,13 +131,13 @@ class User
 			'errors' => array_column($resp['errors'], 'msg', 'id'),
 			'message' => $resp['message']
 		];
-	}
+	}/*
 
 
 	/**
 	 * Регистрация
 	 */
-	public function register(array $data)
+	/*public function register(array $data)
 	{
 		global $modx;
 
@@ -165,6 +166,6 @@ class User
 			'message' => $resp['message']
 		];
     
-	}
+	}*/
 
 }

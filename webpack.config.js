@@ -5,7 +5,6 @@ module.exports = (env, argv) => {
     const entry = {};
     if (argv.mode === 'production') {
         entry['shop.min'] = './src/frontend/index.js';
-        //entry.polyfills = './src/polyfills.js';
     } else {
         entry.shop = './src/frontend/index.js';
         entry.manager = './src/manager/index.js';

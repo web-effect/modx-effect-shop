@@ -15,7 +15,7 @@ el && new Vue({
 		orderId: hash[2] || 0,
 		orders: [],
 
-		profile: {
+		/*profile: {
 			errors: {},
 			form: {},
 			loading: false,
@@ -27,11 +27,11 @@ el && new Vue({
 			form: { newpassword: 1 },
 			loading: false,
 			success: false,
-		}
+		}*/
 	},
 
 	methods: {
-		update(type = 'profile') {
+		/*update(type = 'profile') {
 			if (!['profile', 'password'].includes(type)) return;
 
 			this[type].loading = true;
@@ -48,7 +48,7 @@ el && new Vue({
 					}
 					DEV && console.log(resp);
 				})
-		},
+		},*/
 
 		cancelOrder() {
 			if (confirm('Отменить заказ?')) {
@@ -81,12 +81,12 @@ el && new Vue({
 	},
 
 	created() {
-		this.$shop.$on('load', (data) => {
+		/*this.$shop.$on('load', (data) => {
 			if (data.user) {
 				this.user = data.user;
 				this.profile.form = data.user;
 			} 
-		});
+		});*/
 
 		this.$shop.http('order', 'getMyOrders')
 			.then((resp) => {

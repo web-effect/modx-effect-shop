@@ -62,7 +62,7 @@ Vue.prototype.$shop = new Vue({
                     })
                     .catch((e) => {
                         console.log(`Ошибка: ${e}`);
-                        alert(`Ошибка: ${e}`);
+                        // alert(`Ошибка: ${e}`);
                     });
             })
         }
