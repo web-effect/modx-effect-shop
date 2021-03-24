@@ -102,6 +102,10 @@ document.addEventListener('change', (e) => {
 
     let price = +f.price_el.dataset.price;
 
+    if (f.variation_price) {
+        price = f.variation_price;
+    }
+
     /** если меняется кол-во подтоваров */
     f.addon_qty_els && f.addon_qty_els.forEach((el) => {
         if (el.dataset.addonPrice) {

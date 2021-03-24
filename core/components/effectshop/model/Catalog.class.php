@@ -3,7 +3,7 @@ namespace Shop;
 
 class Catalog
 {
-    const GET_FIELDS = ['id', 'pagetitle', 'uri', 'price', 'price_old', 'image', 'addons'];
+    const GET_FIELDS = ['id', 'pagetitle', 'uri', 'price', 'price_old', 'image', 'addons', 'variations'];
     const SEARCH_QUERY = "(
         IF (`pagetitle` LIKE 'search%', 10, 0) +
         IF (`pagetitle` LIKE '% search %', 9, 0) +
@@ -331,7 +331,7 @@ class Catalog
                 $item['_price_old'] = self::numFormat($item['price_old']);
             }
             // обработка таблиц (доп. товары)
-            foreach (['addons'] as $tableName) {
+            foreach (['addons', 'variations'] as $tableName) {
                 if (!empty($item[$tableName])) {
                     $item[$tableName] = json_decode($item[$tableName], true);
                     foreach ($item[$tableName] as $n => &$tableRow) {

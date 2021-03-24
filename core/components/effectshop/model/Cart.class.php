@@ -95,6 +95,7 @@ class Cart
 				$product['addons'][(int)$key]['qty'] = (int)$val;
 			}
 		}
+		$product['variation'] = $params['variation'] ?? '';
 
 		$intersect = $this->checkIntersect($product);
 		if ($intersect === false) {
@@ -179,6 +180,11 @@ class Cart
 			$item['initial_price'] = $item['initial_price'] ?? (float)$item['price'];
 			$item['price'] = $item['initial_price'];
 
+			if ($item['variation'] != '') {
+				$item['initial_price'] = $item['variations'][(int)$item['variation']]['price'];
+				$item['price'] = $item['initial_price'];
+			}
+
 			if (!empty($item['addons'])) {
 				foreach ($item['addons'] as &$add) {
 					$add['qty'] = (float)$add['qty'] ?: 0;
@@ -237,6 +243,7 @@ class Cart
 			if (
 				$this->cart['items'][$i]['id'] == $product['id']
 				&& $this->cart['items'][$i]['price'] == $product['price']
+				&& $this->cart['items'][$i]['variation'] == $product['variation']
 				&& json_encode($this->cart['items'][$i]['opts'] ?? []) == json_encode($product['opts'] ?? [])
 				&& json_encode($this->cart['items'][$i]['addons'] ?? []) == json_encode($product['addons'] ?? [])
 			) {

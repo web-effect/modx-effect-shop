@@ -78,7 +78,7 @@ class User
 		$out = [];
 		$id = $modx->user->id ?: 0;
 		
-		if ($id && $modx->user->isAuthenticated($props['ctx'] ?? 'web')) {
+		if ($id && $modx->user->isAuthenticated('web')) {
 			$q = $modx->newQuery('modUserProfile');
 			$q->where([
 				'internalKey' => $id,

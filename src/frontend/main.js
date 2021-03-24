@@ -19,7 +19,7 @@ Vue.prototype.$shop = new Vue({
 
     data: {
         url: '/assets/components/effectshop/connector.php',
-        resource: window.resource || {},
+        //resource: window.resource || {},
         delimiters: ['(#', '#)'],
         pathname: window.location.pathname,
     },
@@ -49,7 +49,7 @@ Vue.prototype.$shop = new Vue({
 
         http(to, action, body = {}) {
             const formData = this.toFormData(body);
-            formData.append('ctx', this.resource.ctx || 'web');
+            //formData.append('ctx', this.resource.ctx || 'web');
 
             return new Promise((resolve, reject) => {
                 fetch(this.url + `?to=${to}&action=${action}`, {
