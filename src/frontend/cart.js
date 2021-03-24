@@ -93,6 +93,13 @@ document.addEventListener('submit', (e) => {
 /**
  * Считаем цену
  */
+function numFormat(val) {
+    if(!val) return 0;
+    val = parseFloat(val).toFixed(0);
+    val = String(val).replace(/(\d)(?=(\d{3})+([^\d]|$))/g, "$1\u00a0");
+    return val;		
+}
+
 document.addEventListener('change', (e) => {
     const form = e.target.closest('.shop-item form');
     if (!form) return;
@@ -121,8 +128,8 @@ document.addEventListener('change', (e) => {
     })
 
     price *= f.qty;
-
-    f.price_el.innerHTML = price;
+    
+    f.price_el.innerHTML = numFormat(price);
     DEV && console.log(price);
 
 }, true);

@@ -181,8 +181,11 @@ class Cart
 			$item['price'] = $item['initial_price'];
 
 			if ($item['variation'] != '') {
-				$item['initial_price'] = $item['variations'][(int)$item['variation']]['price'];
-				$item['price'] = $item['initial_price'];
+				$varPrice = $item['variations'][(int)$item['variation']]['price'] ?: 0;
+				if ($varPrice) {
+					$item['initial_price'] = $item['variations'][(int)$item['variation']]['price'];
+					$item['price'] = $item['initial_price'];
+				}
 			}
 
 			if (!empty($item['addons'])) {
