@@ -200,7 +200,7 @@ class CatalogSnippet extends Catalog
         $dicts_titles = [];
         if (!empty($dicts_values)) {
             $qd = $modx->newQuery('modResource');
-            $qd->select(['id', 'pagetitle']);
+            $qd->select(['id', 'pagetitle', 'uri']);
             $qd->where([
                 'id:IN' => $dicts_values
             ]);
@@ -208,6 +208,7 @@ class CatalogSnippet extends Catalog
             $qd->stmt->execute();
             $dicts_titles = $qd->stmt->fetchAll(\PDO::FETCH_ASSOC);
         }
+        $dicts_uris = array_column($dicts_titles, 'uri', 'id');
 		$dicts_titles = array_column($dicts_titles, 'pagetitle', 'id');
 
 
@@ -222,9 +223,11 @@ class CatalogSnippet extends Catalog
                 }
 				$out['filters'][$row['name']]['values'][] = [
 					'label' => $dicts_titles[(int)$v] ?? $elValues[$v] ?? $v,
-					'value' => $v
+					'value' => $v,
+                    'uri' => $dicts_uris[(int)$v] ?? $l,
 				];
 			}
+            $out['filters'][$row['name']]['expanded'] = false; // для показать ещё, если много значений. Если не задать тут, то св-во не реактивно во Vue
 			//удаляем повторяющиеся
 			$out['filters'][$row['name']]['values'] = array_map(
 				"unserialize",

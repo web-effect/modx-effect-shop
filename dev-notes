@@ -18,6 +18,7 @@ cd ~/_dev/modx-effect-shop
 cd ~/_dev/modx-effect-shop/_build
 php7.2 build.transport.php
 
+cd ~/_dev/modx-effect-shop
 git add -A && git commit -m ''
 git push origin master
 

@@ -22,10 +22,6 @@ switch ($action) {
 	case 'getFilters':
 		$response = Shop\CatalogSnippet::getFilters($id);
 		break;
-
-	case 'getOneFull':
-		$response = Shop\CatalogSnippet::getOneFull($id);
-		break;
 }
 
 return $response;
