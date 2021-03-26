@@ -71,12 +71,12 @@ document.addEventListener('submit', (e) => {
 
     const f = ShopCartApp.getProductForm(e.target);
 
-    f.form.classList.remove("is-error");
+    /*f.form.classList.remove("is-error");
     if (Object.values(f.params.opts).length !== f.opt_els.length) {
         f.form.classList.add("is-error");
         console.log('не выбраны опции');
         return;
-    }
+    }*/
 
     f.button && f.button.classList.add("is-loading");
     
@@ -84,8 +84,8 @@ document.addEventListener('submit', (e) => {
         f.button && f.button.classList.remove("is-loading");
         f.button && f.button.classList.add("is-added");
         f.form.classList.add("is-added");
-        f.form.reset();
-        f.form.dispatchEvent(new Event("change"));
+        /*f.form.reset();
+        f.form.dispatchEvent(new Event("change"));*/
     });
 }, false);
 
@@ -109,10 +109,13 @@ document.addEventListener('change', (e) => {
 
     let price = +f.price_el.dataset.price;
 
-    if (f.variation_price) {
-        price = f.variation_price;
+    if (f.variation_el) {
+        let varPrice = +f.variation_el.dataset.variationPrice || 0;
+        if (varPrice) {
+            price = varPrice;
+        }
     }
-
+    
     /** если меняется кол-во подтоваров */
     f.addon_qty_els && f.addon_qty_els.forEach((el) => {
         if (el.dataset.addonPrice) {

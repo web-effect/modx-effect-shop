@@ -133,9 +133,7 @@ const mixin = {
             out.params = { opts: {}, addons: {} };
 
             if (out.variation_el) {
-                out.variation = out.variation_el.value || '';
-                out.variation_price = +out.variation_el.dataset.variationPrice || 0;
-                out.params.variation = out.variation
+                out.params.variation = out.variation_el.value || 0;
             }
 
             out.addon_els.forEach((el) => {

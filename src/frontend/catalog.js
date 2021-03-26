@@ -1,5 +1,5 @@
 const DEV = !!(process.env.NODE_ENV === 'development'),
-      appNodes = document.querySelectorAll('.shop-catalog-app') || [],
+      appNodes = document.querySelectorAll('.shop-catalog-app, .vue-shop-catalog') || [],
       catalogEl = document.querySelector('.shop-catalog-items'),
       dataEl = document.querySelector('.shop-catalog-data'),
       filtersDataEl = document.querySelector('[data-shop-filters]'),
