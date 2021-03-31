@@ -47,6 +47,9 @@
                             <td {$css_td}>{$k+1}</td>
                             <td {$css_td}>
                                 <div>{$i.name}</div>
+                                {if $i.variation}
+                                    <div><small>{$i.variations[$i.variation].name}</small></div>
+                                {/if}
                                 {if $i.options}
                                     {foreach $i.options as $opt}
                                         <div><small>{$opt}</small></div>

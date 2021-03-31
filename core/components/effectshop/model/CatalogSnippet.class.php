@@ -56,6 +56,7 @@ class CatalogSnippet extends Catalog
         
         $catalog = self::getMany($filterProps, $main);
         $out = array_merge($out, $catalog);
+        $out = array_merge($out, $props);
 
         if ($main) {
             $out['html'] = "<div hidden class='shop-catalog-data'
@@ -66,10 +67,7 @@ class CatalogSnippet extends Catalog
             $out['html'] .= Shop::parseTpl($props['tpl'], $out);
         }
 
-        $out['props'] = $props;
-        $response = $out;
-
-        return $response;
+        return $out;
     }
 
 

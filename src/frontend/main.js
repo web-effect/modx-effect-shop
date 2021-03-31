@@ -73,23 +73,4 @@ Vue.prototype.$shop = new Vue({
             data[0] == 1 ? this.$emit('load', data) : alert('Ошибка загрузки корзины')
         });
     }
-
-});
-
-
-/**
- * поиск с подсказками
- */
-import ShopLiveSearch from './components/live-search.vue';
-const searchNodes = document.querySelectorAll('.vue-shop-livesearch') || [];
-
-searchNodes.forEach((el) => {
-    new Vue({
-        el,
-        data: {},
-        components: {
-            ShopLiveSearch
-        },
-        delimiters: ['(#', '#)'],
-    });
 });

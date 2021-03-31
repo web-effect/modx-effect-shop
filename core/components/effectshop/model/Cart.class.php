@@ -247,7 +247,7 @@ class Cart
 				$this->cart['items'][$i]['id'] == $product['id']
 				&& $this->cart['items'][$i]['price'] == $product['price']
 				&& $this->cart['items'][$i]['variation'] == $product['variation']
-				&& json_encode($this->cart['items'][$i]['opts'] ?? []) == json_encode($product['opts'] ?? [])
+				&& json_encode($this->cart['items'][$i]['options'] ?? []) == json_encode($product['options'] ?? [])
 				&& json_encode($this->cart['items'][$i]['addons'] ?? []) == json_encode($product['addons'] ?? [])
 			) {
 				$output = $i;

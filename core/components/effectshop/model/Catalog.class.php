@@ -3,15 +3,15 @@ namespace Shop;
 
 class Catalog
 {
-    const GET_FIELDS = ['id', 'pagetitle', 'uri', 'price', 'price_old', 'image', 'addons', 'variations'];
-    const SEARCH_QUERY = "(
+    const GET_FIELDS = ['id', 'pagetitle', 'uri', 'price', 'price_old', 'image', 'addons', 'variations', 'vendor_code'];
+    const SEARCH_QUERY = "( 
         IF (`pagetitle` LIKE 'search%', 10, 0) +
         IF (`pagetitle` LIKE '% search %', 9, 0) +
         IF (`pagetitle` LIKE '% search%', 8, 0) +
         IF (`pagetitle` LIKE '%search%', 7, 0) +
         IF (`introtext` LIKE '%search%', 5, 0) +
         IF (`content` LIKE '%search%', 1, 0)
-    ) AS `relevant`";
+    ) AS `relevant`"; // ( + пробел заменяется для поиска по артикулу
 
 
     /**
@@ -22,8 +22,6 @@ class Catalog
         switch ($action) {
             case 'liveSearch':
                 return self::liveSearch($_REQUEST['query'], $_REQUEST['mode']);
-            case 'getOneFull':
-                return self::getOneFull((int)$_REQUEST['id']);
         }
     }
 
@@ -42,55 +40,6 @@ class Catalog
 
 
     /**
-     * Получить все поля товара
-     * Возможно, выпилить
-     */
-    public static function getOneFull(int $id)
-    {
-        $cache = Shop::fromCache("fullproduct", $id, 'resource');
-        if ($cache) return $cache;
-
-        global $modx;
-        $resFields = array_keys($modx->getFields('modResource'));
-
-        $qres = $modx->newQuery('modResource');
-        $qres->select($resFields);
-        $qres->where([
-            'modResource.id' => $id
-        ]);
-        $qres->prepare();
-        $qres->stmt->execute();
-        $res = $qres->stmt->fetch(\PDO::FETCH_ASSOC);
-
-        if (empty($res)) return false;
-
-        $q = $modx->newQuery('modTemplateVarResource');
-        $q->select([
-            'modTemplateVarResource.value',
-            'tv.name',
-        ]);
-		$q->innerJoin('modTemplateVar', "tv", "modTemplateVarResource.tmplvarid = tv.id");
-
-        $q->where([
-            'modTemplateVarResource.contentid' => $id
-        ]);
-
-        $q->prepare();
-        $q->stmt->execute();
-        $tvs = $q->stmt->fetchAll(\PDO::FETCH_ASSOC);
-        
-        foreach ($tvs as $tv) {
-            $res[$tv['name']] = $tv['value'];
-        }
-
-        $products = self::processProducts([$res]);
-        Shop::toCache($products[0], "fullproduct", $id, 'resource');
-        return $products[0] ?: false;
-        
-    }
-
-
-    /**
      * Получить товары
      */
     public static function getMany(array $props = [], $pagination = false)
@@ -105,6 +54,7 @@ class Catalog
 
         $cfg = Params::cfg();
         $select = $having = $joins = [];
+        $select[] = '"product" as "type"'; // для живого поиска, для отделения от категорий
 
         $getFields = array_merge(self::GET_FIELDS, ($cfg['product_get_fields'] ?? []));
         $resFields = array_keys($modx->getFields('modResource'));
@@ -149,7 +99,12 @@ class Catalog
         /* Поиск */
         $search = trim($props['search'] ?? '');
         if (strlen($search)) {
-            $select[] = str_replace('search', $search, self::SEARCH_QUERY);
+            $search = urldecode($search);
+            $search = preg_replace('/\s+/', ' ', $search);
+
+            $searchQuery = self::SEARCH_QUERY;
+            $searchQuery = str_replace('( ', "( IF (`tv_vendor_code`.`value` LIKE '%search%', 6, 0) + ", $searchQuery);
+            $select[] = str_replace('search', $search, $searchQuery);
             $having[] = "relevant>0";
             $sortField = 'relevant';
             $sortDir = 'DESC';
@@ -422,9 +377,10 @@ class Catalog
     /**
      * Быстрый поиск
      */
-    private static function liveSearch($q, $mode = 'default')
+    private static function liveSearch($q = '', $mode = 'default')
     {
-        $search = trim($q);
+        $search = urldecode(trim($q));
+        $search = preg_replace('/\s+/', ' ', $search);
 
         $cache = Shop::fromCache("livesearch-{$mode}-", $search, 'resource');
         if ($cache) return $cache;
@@ -432,27 +388,12 @@ class Catalog
         $time_start = microtime(true);
         $cfg = Params::cfg();
         global $modx;
-        $out = ['rows' => []];
-        $rows = [];
-
         
-        $q = $modx->newQuery('modResource');
-        $q->select([
-            str_replace('search', $search, self::SEARCH_QUERY),
-            '`modResource`.`pagetitle` as `name`',
-            '`modResource`.`uri`',
-            '"product" as "type"'
+        $catalog = self::getMany([
+            'search' => $search,
+            'limit' => 10,
         ]);
-        $q->limit(10);
-        $q->where([
-            'template:IN' => $cfg['product_tmpls'],
-            'deleted' => 0, 'published' => 1
-        ]);
-        $q->sortby('relevant', 'DESC');
-        $q->having("relevant>0");
-        if ($q->prepare() && $q->stmt->execute()) {
-            $rows = $q->stmt->fetchAll(\PDO::FETCH_ASSOC);
-        }
+        $rows = $catalog['rows'];
         
         if ($mode != 'products') {
             $q2 = $modx->newQuery('modResource');
