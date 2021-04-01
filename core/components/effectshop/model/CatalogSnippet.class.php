@@ -35,7 +35,7 @@ class CatalogSnippet extends Catalog
             if (isset($filterProps[$p])) unset($filterProps[$p]);
         }
 
-        $uri = strtok(strtok($_SERVER["REQUEST_URI"], '?'), '/');
+        $uri = strtok(strtok($filterProps["uri"], '?'), '/');
         $out['pageType'] = 'default';
         
         switch ($uri) {
@@ -56,7 +56,6 @@ class CatalogSnippet extends Catalog
         
         $catalog = self::getMany($filterProps, $main);
         $out = array_merge($out, $catalog);
-        $out = array_merge($out, $props);
 
         if ($main) {
             $out['html'] = "<div hidden class='shop-catalog-data'
@@ -64,7 +63,7 @@ class CatalogSnippet extends Catalog
                 data-total='{$out['total']}'
                 data-limit='{$out['limit']}'
             ></div>";
-            $out['html'] .= Shop::parseTpl($props['tpl'], $out);
+            $out['html'] .= Shop::parseTpl($props['tpl'], array_merge($out, $props));
         }
 
         return $out;

@@ -13,6 +13,7 @@ switch ($action) {
 			$scriptProperties['id'] = $id;
 			// Подборка или нет
 			$scriptProperties['selections'] = $modx->resource->class_key == 'SelectionContainer' ? true : false;
+			$scriptProperties['uri'] = $_SERVER["REQUEST_URI"];
 			$_SESSION['shop_products_snippet'] = $scriptProperties;
 			$response = Shop\CatalogSnippet::getProductsSnippet($_GET, true);
 		} else {
