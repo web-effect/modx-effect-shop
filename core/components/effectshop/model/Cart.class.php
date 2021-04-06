@@ -8,68 +8,152 @@ class Cart
 {
 
 	public function __construct($order = false)
-	{
-		global $modx;
-		$this->modx = &$modx;
-		$this->cfg = Params::cfg();
-
-		if (!$order) {
-			if (empty($_SESSION['shop_cart']) || empty($_SESSION['shop_cart']['items'])) {
-				$_SESSION['shop_cart'] = [
-					'items' => [],
-					'created' => time()
-				];
-			}
-			$this->cart = &$_SESSION['shop_cart'];
-		} else {
-			$this->cart = &$order;
-		}
-	}
+    {
+        global $modx;
+        $this->modx = &$modx;
+        $this->modx->addPackage('effectshop', MODX_CORE_PATH . 'components/effectshop/model/');
+        $this->cfg = Params::cfg();
+        
+        if (!$order) {
+            $this->editOrderMode = false;
+            $this->cart = $this->get();
+        } else {
+            $this->editOrderMode = true;
+            $this->cart = &$order;
+        }
+    }
 
 
 	/**
 	 * Ajax запросы
 	 */
 	public function request($action)
-	{
-		$output = [];
-		$params = $_POST['params'] ?? [];
+    {
+        $output = [];
+        $params = $_POST['params'] ?? [];
 
-		switch ($action) {
-			case 'add':
-				$output['product'] = $this->add((int)$_POST['id'], (int)$_POST['qty'], $params);
-				break;
-			case 'remove':
-				$output['product'] = $this->remove((int)$_POST['index']);
-				break;
-			case 'qty':
-				$output['product'] = $this->qty((int)$_POST['index'], (int)$_POST['qty']);
-				break;
-			case 'addonQty':
-				$output['product'] = $this->addonQty((int)$_POST['index'], (int)$_POST['addon'], (float)$_POST['qty']);
-				break;
-			case 'setValue':
-				$this->cart[$_POST['key']] = $_POST['val'];
-				break;
-			case 'clean':
-				$this->clean();
-				break;
-			default:	
-		}
+        switch ($action) {
+            case 'add':
+                $output['product'] = $this->add((int)$_POST['id'], (int)$_POST['qty'], $params);
+                break;
+            case 'remove':
+                $output['product'] = $this->remove((int)$_POST['index']);
+                break;
+            case 'qty':
+                $output['product'] = $this->qty((int)$_POST['index'], (int)$_POST['qty']);
+                break;
+            case 'addonQty':
+                $output['product'] = $this->addonQty((int)$_POST['index'], (int)$_POST['addon'], (float)$_POST['qty']);
+                break;
+            case 'setValue':
+                $this->cart[$_POST['key']] = $_POST['val'];
+                break;
+            case 'clean':
+                $this->clean();
+                break;
+            default:	
+        }
 
-		$output['cart'] = $this->processCart();
-		$output[0] = 1;
-		return $output;
-	}
+        $output[0] = 1;
+        $output['cart'] = $this->processCart();
+
+        if (!$this->editOrderMode && $action != 'clean') {
+            $this->setToDB();
+        }
+
+        return $output;
+    }
+
+
+
+    /**
+     * Создание корзины в БД
+     */
+    private function new() {
+        $key = uniqid();
+        setcookie("shop_cart_key", $key, time()+3600*24*365*10, '/');
+        $obj = $this->modx->newObject('shop_cart');
+        if ($this->modx->user && $this->modx->user->id) {
+            $obj->set('userid', $this->modx->user->id);
+        }
+        $obj->set('key', $key);
+        $obj->save();
+    }
+
+
+    /**
+     * Получение корзины из БД
+     */
+    public function get() {
+        $key = $_COOKIE['shop_cart_key'] ?: '';
+        $cart = false;
+
+        if (!empty($key)) {
+            $q = $this->modx->newQuery('shop_cart');
+            $q->select([
+                'cart', 'id'
+            ]);
+            $q->where([
+                'key' => $key,
+            ]);
+            $q->prepare();
+            $q->stmt->execute();
+            $result = $q->stmt->fetch(\PDO::FETCH_ASSOC);
+            if (empty($result['id'])) {
+                $this->new();
+                $cart = [];
+            } else {
+                $cart = json_decode($result['cart'] ?: [], true);
+            }
+        } else {
+            $this->new();
+            $cart = [];
+        }
+        if (empty($cart)) {
+            $cart = [];
+        }
+        if (empty($cart['items'])) $cart['items'] = [];
+
+        return $cart;
+    }
+
+
+    /**
+     * Запись данных в корзину
+     */
+    private function setToDB() {
+        $key = $_COOKIE['shop_cart_key'] ?: '';
+        $obj = $this->modx->getObject('shop_cart', [
+            'key' => $key
+        ]);
+        if ($obj) {
+            $obj->set('cart', $this->cart ?: []);
+            $obj->save();
+        } else {
+            $this->modx->log(1, "Ошибка в корзине key {$key}" . __LINE__);
+        }
+    }
 
 
 	/**
 	 * Очистить корзину
 	 */
-	private function clean()
-	{
-		$_SESSION['shop_cart'] = [];
-	}
+    public function clean()
+    {
+        $key = $_COOKIE['shop_cart_key'] ?: '';
+        if (!empty($key)) {
+            $obj = $this->modx->getObject('shop_cart', [
+                'key' => $key
+            ]);
+            if ($obj) {
+                $obj->remove();
+                setcookie("shop_cart_key", "", time()-3600, '/');
+                unset($_COOKIE['shop_cart_key']);
+            }
+        }
+		$this->cart['items'] = [];
+        $this->new();
+    }
 
 
 	/**
@@ -100,10 +184,12 @@ class Cart
 		$intersect = $this->checkIntersect($product);
 		if ($intersect === false) {
 			$product = $this->cropImage($product);
-			foreach ($product['addons'] ?? [] as $a_key => $add) {
-				$product['addons'][$a_key] = $this->cropImage($add);
+			foreach (['addons', 'variations'] as $name) {
+				foreach ($product[$name] ?? [] as $a_key => $add) {
+					$product[$name][$a_key] = $this->cropImage($add);
+				}
 			}
-
+	
 			array_push($this->cart['items'], $product);
 		} else {
 			$this->cart['items'][$intersect]['qty'] += $product['qty'];
@@ -242,13 +328,23 @@ class Cart
 	private function checkIntersect($product)
 	{
 		$output = false;
-		for( $i=0; $i < count($this->cart['items']); $i++ ){
+
+		foreach ($product['addons'] ?? [] as $k => &$addon) {
+			ksort($product['addons'][$k]);
+		}
+
+		for ($i=0; $i < count($this->cart['items']); $i++) {
+			$addons = $this->cart['items'][$i]['addons'] ?? [];
+			foreach ($addons as $k => &$addon) {
+				if (!empty($addon['thumb'])) unset($addon['thumb']);
+				ksort($addons[$k]);
+			}
 			if (
 				$this->cart['items'][$i]['id'] == $product['id']
 				&& $this->cart['items'][$i]['price'] == $product['price']
 				&& $this->cart['items'][$i]['variation'] == $product['variation']
 				&& json_encode($this->cart['items'][$i]['options'] ?? []) == json_encode($product['options'] ?? [])
-				&& json_encode($this->cart['items'][$i]['addons'] ?? []) == json_encode($product['addons'] ?? [])
+				&& json_encode($addons) == json_encode($product['addons'] ?? [])
 			) {
 				$output = $i;
 				break;

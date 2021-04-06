@@ -63,7 +63,9 @@ class Order
             return [0, "Email {$post['email']} неверный"];
         }
 
-        $order = $_SESSION['shop_cart'];
+        $Cart = new Cart();
+        $order = $Cart->get();
+        
         $order['contacts'] = [];
         $order['options'] = [];
         $order['delivery'] = $post['delivery'] ?? '';
@@ -130,8 +132,8 @@ class Order
             ]
         ]);
 
-        if($mail[0] == 1)  {
-            unset($_SESSION['shop_cart']);
+        if ($mail[0] == 1)  {
+            $Cart->clean();
             return [1, $order];
         } else {
             return $mail;

@@ -5,5 +5,6 @@ $xpdo_meta_map = array (
   array (
     0 => 'shop_order',
     1 => 'shop_config',
+    2 => 'shop_cart',
   ),
 );
