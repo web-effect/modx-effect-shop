@@ -131,6 +131,8 @@ class Cart
             $obj->save();
         } else {
             $this->modx->log(1, "Ошибка в корзине key {$key}" . __LINE__);
+			// Если вдруг ошибка, чистим куки
+            setcookie("shop_cart_key", "", time()-3600, '/');
         }
     }
 
@@ -164,7 +166,7 @@ class Cart
 		$product = Catalog::getOne($id);
 		if (empty($product)) return false;
 
-		$product['price'] = $this->cleanPrice($product['price']);
+		$product['initial_price'] = $this->cleanPrice($product['price']);
 		$product['qty'] = $this->cleanCount($qty) ?: 1;
 		$product['url'] = $this->modx->makeUrl($product['id'], '', '', 'full' );
 		
@@ -245,7 +247,11 @@ class Cart
 
 
 	/**
-	 * 
+	 * initial_price — начальная цена товара (с учетом вариации)
+	 * discount_price — цена со скидкой
+	 * price — цена со скидкой и доп. товарами
+	 * no_discount_price — цена без скидки, с доп. товарами
+	 * total_price — цена * кол-во
 	 */
 	public function processCart($order = false)
 	{
@@ -262,38 +268,47 @@ class Cart
 		$order['qty'] = 0;
 		
 		foreach($order['items'] as $k => &$item) {
-			$item['qty'] = (int)$item['qty'];
-			$item['initial_price'] = $item['initial_price'] ?? (float)$item['price'];
-			$item['price'] = $item['initial_price'];
 
 			if ($item['variation'] != '') {
-				$varPrice = $item['variations'][(int)$item['variation']]['price'] ?: 0;
+				$varPrice = $this->cleanPrice($item['variations'][(int)$item['variation']]['price'] ?: 0);
 				if ($varPrice) {
-					$item['initial_price'] = $item['variations'][(int)$item['variation']]['price'];
-					$item['price'] = $item['initial_price'];
+					$item['initial_price'] = $varPrice;
 				}
 			}
 
+			$item['discount_percent'] = $item['discount'] ?? $order['discount'] ?? 0;
+			$item['discount_val'] = $item['initial_price'] * ($item['discount_percent'] / 100);
+			$item['discount_price'] = round(($item['initial_price'] - $item['discount_val']));
+			$item['price'] = $item['discount_price'];
+			$item['no_discount_price'] = $item['initial_price'];
+
 			if (!empty($item['addons'])) {
 				foreach ($item['addons'] as &$add) {
+					$add['initial_price'] = $this->cleanPrice($add['initial_price'] ?? (float)$add['price'] ?? 0);
+					$add['discount_percent'] = $add['discount'] ?? $item['discount'] ?? $order['discount'] ?? 0;
+					$add['discount_val'] = $add['initial_price'] * ($add['discount_percent'] / 100);
+					$add['price'] = round($add['initial_price'] - $add['discount_val']);
 					$add['qty'] = (float)$add['qty'] ?: 0;
-					$addPrice = (float)$add['price'] * $add['qty'];
-					$item['price'] += $addPrice;
+					$add['total_price'] = $add['price'] * $add['qty'];
+					
+					$item['price'] += $add['total_price'];
+					$item['no_discount_price'] += $add['initial_price'] * $add['qty'];
 				}
 				unset($add);
 			}
 
+			$item['total_price'] = $item['price'] * $item['qty'];
+
 			$order['qty'] += $item['qty'];
-			$item['total_price'] = round(($item['price'] * $item['qty']), 2);
 			$order['price'] += $item['total_price'];
 		}
 		unset($item);
 		
-		$order['price'] = round($order['price'], 2);
-		$order['discount'] = $order['discount'] ?? 0;
-		$order['delivery_price'] = $order['delivery_price'] ?? 0;
-		$discount = $order['price'] * (((float)$order['discount']) / 100);
-		$order['total_price'] = $order['price'] + ((float)$order['delivery_price']) - $discount;
+		//$order['discount'] = $order['discount'] ?? 0;
+		$order['delivery_price'] = $this->cleanPrice($order['delivery_price'] ?? 0);
+		//$discount = $order['price'] * (((float)$order['discount']) / 100);
+		//$order['total_price'] = $order['price'] + ((float)$order['delivery_price']) - $discount;
+		$order['total_price'] = $order['price'] + $order['delivery_price'];
 
 		$fromEventAfter = $this->modx->invokeEvent('ShopCartAfterProcess', [
 			'cart' => $order,

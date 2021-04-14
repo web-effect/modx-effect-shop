@@ -1,58 +1,62 @@
 const DEV = !!(process.env.NODE_ENV === 'development');
-const appNodes = document.querySelectorAll('.vue-shop-cart') || [];
+const appNodes = document.querySelectorAll('.vue-shop-cart');
 
 import mixin from './cart-mixin.js';
 
-const ShopCartApp = new Vue({
-    
-    mixins: [mixin],
-    
-    created() {
-        if (localStorage.getItem('shop_order_form')) {
-            try {
-                this.form = JSON.parse(localStorage.getItem('shop_order_form'));
-            } catch(e) {
-                localStorage.removeItem('shop_order_form');
-            }
-        }
-
-        this.$shop.$on('load', (data) => {
-            this.cart = data.cart;
-            this.methods = data.methods;
-            this.status = this.cart.qty ? 'default' : 'empty';
-            this.loading.cart = false;
-            DEV && console.log('Корзина', data);
-            if (data.user) {
-                for (let field in data.user) {
-                    if (data.user[field] && typeof(data.user[field]) !== 'object') {
-                        this.form[field] = data.user[field];
-                    }
+if (appNodes.length) {
+    const ShopCartApp = new Vue({
+        
+        mixins: [mixin],
+        
+        created() {
+            if (localStorage.getItem('shop_order_form')) {
+                try {
+                    this.form = JSON.parse(localStorage.getItem('shop_order_form'));
+                } catch(e) {
+                    localStorage.removeItem('shop_order_form');
                 }
             }
-            const event = new CustomEvent('shop-cart-load', {
-                detail: { response: data }
+
+            this.$shop.http('shop', 'load').then((data) => {
+                if (!data[0]) {
+                    alert('Ошибка загрузки корзины');
+                }
+                this.cart = data.cart;
+                this.methods = data.methods;
+                this.status = this.cart.qty ? 'default' : 'empty';
+                this.loading.cart = false;
+                DEV && console.log('Корзина', data);
+                if (data.user) {
+                    for (let field in data.user) {
+                        if (data.user[field] && typeof(data.user[field]) !== 'object') {
+                            this.form[field] = data.user[field];
+                        }
+                    }
+                }
+                const event = new CustomEvent('shop-cart-load', {
+                    detail: { response: data }
+                });
+                document.dispatchEvent(event);
             });
-            document.dispatchEvent(event);
-        });
-        
-        this.favoritesCount = savedProductsFromCookie('favorites').length;
-        this.compareCount = savedProductsFromCookie('compare').length;
-    },
+            
+            this.favoritesCount = savedProductsFromCookie('favorites').length;
+            this.compareCount = savedProductsFromCookie('compare').length;
+        },
 
-    watch: {
-        form: {
-            handler() {
-                const o = Object.assign({}, this.form);
-                o.delivery && delete o.delivery;
-                o.payment && delete o.payment;
-                localStorage.setItem('shop_order_form', JSON.stringify(o));
-            },
-            deep: true
+        watch: {
+            form: {
+                handler() {
+                    const o = Object.assign({}, this.form);
+                    o.delivery && delete o.delivery;
+                    o.payment && delete o.payment;
+                    localStorage.setItem('shop_order_form', JSON.stringify(o));
+                },
+                deep: true
+            }
         }
-    }
-});
-window.ShopCartApp = ShopCartApp;
-
+    });
+    window.ShopCartApp = ShopCartApp;
+}
 
 appNodes.forEach((el) => {
     new Vue({

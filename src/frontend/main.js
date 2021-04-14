@@ -67,10 +67,4 @@ Vue.prototype.$shop = new Vue({
             })
         }
     },
-    
-    created() {
-        this.http('shop', 'load').then((data) => {
-            data[0] == 1 ? this.$emit('load', data) : alert('Ошибка загрузки корзины')
-        });
-    }
 });

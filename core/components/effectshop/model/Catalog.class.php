@@ -281,8 +281,8 @@ class Catalog
             // считаем скидку
             if (!empty($item['price_old'])) {
                 $item['price_old'] = (float)$item['price_old'];
-                $item['discount'] = 1 - ($item['price'] / $item['price_old']);
-                $item['discount'] = round($item['discount'] * 100);
+                $item['price_old_discount'] = 1 - ($item['price'] / $item['price_old']);
+                $item['price_old_discount'] = round($item['price_old_discount'] * 100);
                 $item['_price_old'] = self::numFormat($item['price_old']);
             }
             // обработка таблиц (доп. товары)
