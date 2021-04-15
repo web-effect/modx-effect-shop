@@ -253,9 +253,9 @@ class Cart
 	 * no_discount_price — цена без скидки, с доп. товарами
 	 * total_price — цена * кол-во
 	 */
-	public function processCart($order = false)
+	public function processCart()
 	{
-		$order = $order ?: $this->cart;
+		$order = $this->cart;
 
 		$fromEventBefore = $this->modx->invokeEvent('ShopCartBeforeProcess', [
 			'cart' => $order,
@@ -269,8 +269,9 @@ class Cart
 		
 		foreach($order['items'] as $k => &$item) {
 
+			// если есть вариация, цену из управления заказами (пока) поменять нельзя
 			if ($item['variation'] != '') {
-				$varPrice = $this->cleanPrice($item['variations'][(int)$item['variation']]['price'] ?: 0);
+				$varPrice = $this->cleanPrice($item['variations'][(float)$item['variation']]['price'] ?: 0);
 				if ($varPrice) {
 					$item['initial_price'] = $varPrice;
 				}
@@ -304,10 +305,7 @@ class Cart
 		}
 		unset($item);
 		
-		//$order['discount'] = $order['discount'] ?? 0;
 		$order['delivery_price'] = $this->cleanPrice($order['delivery_price'] ?? 0);
-		//$discount = $order['price'] * (((float)$order['discount']) / 100);
-		//$order['total_price'] = $order['price'] + ((float)$order['delivery_price']) - $discount;
 		$order['total_price'] = $order['price'] + $order['delivery_price'];
 
 		$fromEventAfter = $this->modx->invokeEvent('ShopCartAfterProcess', [

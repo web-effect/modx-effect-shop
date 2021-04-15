@@ -133,11 +133,15 @@
 				>
 					<a target="_blank" :href="props.row.url"
 						:class="{opacity: !productsIds.includes(props.row.id)}"
-					>{{ props.row.name }}</a>
+						v-html="props.row.name"
+					></a>
 					
 					<!-- Вариация -->
 					<div v-if="props.row.variation && props.row.variations && props.row.variations[props.row.variation]">
 						{{ props.row.variations[props.row.variation].name }}
+						<div class="has-text-grey">
+							<small>Цена вариативного товара не редактируется</small>
+						</div>
 					</div>
 
 					<!-- Опции -->
@@ -152,12 +156,11 @@
 						<li v-for="add in props.row.addons" class="order-add-item">
 							<div class="order-add-item-name"
 								:class="{ 'has-text-grey-light' : !add.qty}"
-							>
-								{{ add.name }}
-							</div>
+								v-html="add.name"
+							></div>
 							
 							<b-field>
-								<b-input required type="number" v-model="add.price" min="0.01" step="0.01"
+								<b-input required type="number" v-model="add.initial_price" min="0.01" step="0.01"
 									size="is-small"
 								></b-input>
 							</b-field>
@@ -192,6 +195,9 @@
 					v-slot="props"
 				>
 					{{ (props.row.price * props.row.qty) | price }}
+					<div v-if="props.row.discount_percent">
+						<small>−{{ props.row.discount_percent }}%</small>
+					</div>
 				</b-table-column>
 
 				<b-table-column  custom-key="remove"

@@ -57,7 +57,7 @@
                                 {/if}
                             </td>
                             <td {$css_td}>{$i.qty}</td>
-                            <td {$css_td}>{($i.initial_price ?: $i.price)|num_format} руб.</td>
+                            <td {$css_td}>{$i.discount_price|num_format} руб.</td>
                         </tr>
                         {if $i.addons}
                             {foreach $i.addons as $k=>$a}

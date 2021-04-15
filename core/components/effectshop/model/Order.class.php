@@ -147,8 +147,8 @@ class Order
      */
     public function saveOrder($order, $id = false)
     {
-        $Cart = new Cart();
-        $order = $Cart->processCart($order);
+        $Cart = new Cart($order);
+        $order = $Cart->processCart();
         
         if(empty($order['items']) || empty($order['total_price']) || !is_numeric($order['total_price'])) {
             return [0, "Не передан состав заказа или сумма: ".__LINE__];
@@ -291,9 +291,16 @@ class Order
         foreach ($q_result as $key => $res) {
             $fields = $res;
             
-            foreach($fields as $key => $value) {
+            foreach ($fields as $key => $value) {
                 if (in_array($key, ['history', 'items', 'contacts', 'options'])) {
                     $fields[$key] = json_decode($value, true) ?: [];
+                }
+            }
+
+            foreach ($fields['items'] as &$item) {
+                foreach(['qty'] as $param) {
+                    // иначе косяк при сохранении в упр. заказами
+                    $item[$param] = (float)$item[$param];
                 }
             }
 
