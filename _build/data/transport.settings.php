@@ -28,6 +28,16 @@ $sets = [
         'xtype' => 'textarea',
         'value' => "fullname==Имя, email==Email, phone==Телефон, address==Адрес, comment==Комментарий"
     ],
+
+    'subject_order_admin' => [
+        'value' => 'На сайте SITENAME сделан новый заказ'
+    ],
+    'subject_order_user' => [
+        'value' => 'Вы сделали заказ на сайте SITENAME'
+    ],
+    'subject_order_status' => [
+        'value' => 'Изменён статус вашего заказа на сайте SITENAME'
+    ],
 ];
 
 $data['modSystemSetting'] = [

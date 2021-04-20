@@ -46,6 +46,10 @@ class Params
 		
 		$array['contact_fields'] = self::getOpt('effectshop.contact_fields', [], 2);
 
+		$array['subject_order_admin'] = self::getOpt('effectshop.subject_order_admin', 'Пусто');
+		$array['subject_order_user'] = self::getOpt('effectshop.subject_order_user', 'Пусто');
+		$array['subject_order_status'] = self::getOpt('effectshop.subject_order_status', 'Пусто');
+
 		Shop::toCache($array, 'shop_cfg');
 		return $array;
 	}

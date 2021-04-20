@@ -116,7 +116,7 @@ class Order
 
         $mail = Mail::send([
             'to' => $this->cfg['mail_to'],
-            'subject' => "На сайте SITENAME сделан новый заказ",
+            'subject' => $this->cfg['subject_order_admin'],
             'pls' => [
                 'mode' => 'new',
                 'order' => $order,
@@ -125,7 +125,7 @@ class Order
         
         $mail2 = Mail::send([
             'to' => $post['email'],
-            'subject' => "Вы сделали заказ на сайте SITENAME",
+            'subject' => $this->cfg['subject_order_user'],
             'pls' => [
                 'mode' => 'user',
                 'order' => $order,
@@ -369,7 +369,7 @@ class Order
         if ($sendMail) {
             $mail = Mail::send([
                 'to' => $order['contacts']['email'],
-                'subject' => "Изменён статус вашего заказа на сайте SITENAME",
+                'subject' => $this->cfg['subject_order_status'],
                 'pls' => [
                     'mode' => 'status',
                     'comment' => $comment,
