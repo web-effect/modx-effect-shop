@@ -98,10 +98,13 @@ document.addEventListener('submit', (e) => {
  * Считаем цену
  */
 function numFormat(val) {
-    if(!val) return 0;
-    val = parseFloat(val).toFixed(0);
-    val = String(val).replace(/(\d)(?=(\d{3})+([^\d]|$))/g, "$1\u00a0");
-    return val;		
+    if (!val) return 0;
+    /*val = parseFloat(val).toFixed(0);
+    val = String(val).replace(/(\d)(?=(\d{3})+([^\d]|$))/g, "$1\u00a0");*/
+    val = Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(val);
+    val = val.replace(',00', '');
+    val = val.replace(' ₽', '');
+    return val;			
 }
 
 document.addEventListener('change', (e) => {
@@ -111,10 +114,10 @@ document.addEventListener('change', (e) => {
     const f = ShopCartApp.getProductForm(e.target);
     if (!f.price_el) return;
 
-    let price = +f.price_el.dataset.price;
+    let price = +f.price_el.dataset.price.replace(',', '.');
 
     if (f.variation_el) {
-        let varPrice = +f.variation_el.dataset.variationPrice || 0;
+        let varPrice = +f.variation_el.dataset.variationPrice.replace(',', '.') || 0;
         if (varPrice) {
             price = varPrice;
         }
@@ -123,13 +126,13 @@ document.addEventListener('change', (e) => {
     /** если меняется кол-во подтоваров */
     f.addon_qty_els && f.addon_qty_els.forEach((el) => {
         if (el.dataset.addonPrice) {
-            price += +el.value * +el.dataset.addonPrice;
+            price += +el.value * +el.dataset.addonPrice.replace(',', '.');;
         }
     })
     /** если подтовары чекбоксами или радиокнопками */
     f.prices_plus_els && f.prices_plus_els.forEach((el) => {
         if (el.type && ['checkbox', 'radio'].includes(el.type) && el.checked) {
-            price += +el.dataset.pricePlus;
+            price += +el.dataset.pricePlus.replace(',', '.');
         }
     })
 

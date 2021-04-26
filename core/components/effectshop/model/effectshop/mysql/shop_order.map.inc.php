@@ -71,19 +71,19 @@ $xpdo_meta_map['shop_order'] = array(
 		],
 		
 		'price' => [
-			'dbtype' => 'float', 'phptype' => 'float',
+			'dbtype' => 'double', 'phptype' => 'float',
 			'null' => false, 'default' => 0,
 		],
 		'delivery_price' => [
-			'dbtype' => 'float', 'phptype' => 'float',
+			'dbtype' => 'double', 'phptype' => 'float',
 			'null' => false, 'default' => 0,
 		],
 		'discount' => [
-			'dbtype' => 'float', 'phptype' => 'float',
+			'dbtype' => 'double', 'phptype' => 'float',
 			'null' => false, 'default' => 0,
 		],
 		'total_price' => [
-			'dbtype' => 'float', 'phptype' => 'float',
+			'dbtype' => 'double', 'phptype' => 'float',
 			'null' => false, 'default' => 0,
 		],
 		

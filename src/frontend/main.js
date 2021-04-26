@@ -7,8 +7,11 @@ Vue.mixin({
     filters: {
         numFormat(val) {
             if(!val) return 0;
-            val = parseFloat(val).toFixed(0);
-            val = String(val).replace(/(\d)(?=(\d{3})+([^\d]|$))/g, "$1\u00a0");
+            /*val = parseFloat(val).toFixed(0);
+            val = String(val).replace(/(\d)(?=(\d{3})+([^\d]|$))/g, "$1\u00a0");*/
+            val = Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(val);
+            val = val.replace(',00', '');
+            val = val.replace(' ₽', '');
             return val;		
         }
     },

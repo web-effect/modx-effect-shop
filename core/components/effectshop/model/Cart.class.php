@@ -271,7 +271,7 @@ class Cart
 
 			// если есть вариация, цену из управления заказами (пока) поменять нельзя
 			if ($item['variation'] != '') {
-				$varPrice = $this->cleanPrice($item['variations'][(float)$item['variation']]['price'] ?: 0);
+				$varPrice = $this->cleanPrice($item['variations'][$item['variation']]['price'] ?: 0);
 				if ($varPrice) {
 					$item['initial_price'] = $varPrice;
 				}
@@ -279,7 +279,7 @@ class Cart
 
 			$item['discount_percent'] = $item['discount'] ?? $order['discount'] ?? 0;
 			$item['discount_val'] = $item['initial_price'] * ($item['discount_percent'] / 100);
-			$item['discount_price'] = round(($item['initial_price'] - $item['discount_val']));
+			$item['discount_price'] = round(($item['initial_price'] - $item['discount_val']), 10);
 			$item['price'] = $item['discount_price'];
 			$item['no_discount_price'] = $item['initial_price'];
 
@@ -288,7 +288,7 @@ class Cart
 					$add['initial_price'] = $this->cleanPrice($add['initial_price'] ?? (float)$add['price'] ?? 0);
 					$add['discount_percent'] = $add['discount'] ?? $item['discount'] ?? $order['discount'] ?? 0;
 					$add['discount_val'] = $add['initial_price'] * ($add['discount_percent'] / 100);
-					$add['price'] = round($add['initial_price'] - $add['discount_val']);
+					$add['price'] = round($add['initial_price'] - $add['discount_val'], 2);
 					$add['qty'] = (float)$add['qty'] ?: 0;
 					$add['total_price'] = $add['price'] * $add['qty'];
 					

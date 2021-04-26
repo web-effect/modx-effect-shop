@@ -296,7 +296,7 @@ class Catalog
                             $tableRow['image'] = "$img_path{$tableRow['image']}";
                         }
                         if (isset($tableRow['price'])) {
-                            $tableRow['price'] = (float)$tableRow['price'];
+                            $tableRow['price'] = $tableRow['price'];
                         }
                         $tableRow['qty'] = 0;
                     }
