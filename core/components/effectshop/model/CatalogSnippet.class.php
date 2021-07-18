@@ -73,7 +73,7 @@ class CatalogSnippet extends Catalog
     /**
      * Значения фильтров
      */
-    public static function getFilters($section = 0)
+    public static function getFilters($section = 0, $filter_collections = false)
     {
         $cache = Shop::fromCache('filters_', $section, 'resource');
 		if ($cache) return $cache;
@@ -105,7 +105,7 @@ class CatalogSnippet extends Catalog
 		$qr->groupBy('tv.id');
         $qr->innerJoin('modTemplateVar', "tv", "modTemplateVarResource.tmplvarid = tv.id");
         
-        if ($cfg['filter_collections']) {
+        if ($cfg['filter_collections'] || $filter_collections) {
             $qr->innerJoin(
                 'CollectionSelection',
                 'coll',
@@ -155,7 +155,7 @@ class CatalogSnippet extends Catalog
         ]);
 
 		$q->innerJoin('modTemplateVar', "tv", "modTemplateVarResource.tmplvarid = tv.id");
-        if ($cfg['filter_collections']) {
+        if ($cfg['filter_collections'] || $filter_collections) {
             $q->innerJoin(
                 'CollectionSelection',
                 'coll',

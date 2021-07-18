@@ -23,7 +23,8 @@ switch ($action) {
 		break;
 
 	case 'getFilters':
-		$response = Shop\CatalogSnippet::getFilters($id);
+		$filter_collections = $modx->resource->class_key == 'SelectionContainer' ? true : false;
+		$response = Shop\CatalogSnippet::getFilters($id, $filter_collections);
 		break;
 }
 
