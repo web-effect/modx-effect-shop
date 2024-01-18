@@ -114,8 +114,7 @@ prod_label — имя tv, в значенях которого м. б. action||n
 
 	<button @click="filterVisible = !filterVisible || false" class="filter-toggle" :class="{ 'is-active': filterVisible}">
 	    Фильтр
-	    {"/assets/web/fa/solid/chevron-down.svg"|svg}
-    </button>
+    	</button>
 
 	<div class="filter" :class="{ 'is-visible': filterVisible}">
 		
@@ -125,7 +124,7 @@ prod_label — имя tv, в значенях которого м. б. action||n
 			
 				<div class="field select-wrapper">
 					<select @change="sorting()" v-model="sort" class="input">
-					    <option value="">умолчанию</option>
+						<option value="">умолчанию</option>
 						<option value="price">цене. сначала недорогие</option>
 						<option value="price-desc">цене. сначала подороже</option>
 						<option value="pagetitle">алфавиту (А-Я)</option>
