@@ -28,13 +28,6 @@
 <script>window.resource = <$$res|toJSON$></script>
 ```
 
-dev включает режим разработки: в консоль пишутся запросы, включены sourcemaps.
-
-effect-ui (библиотека с vue-компонентами) и nouislider подключать не обязательно.
-
-Vue delimiters изменены на (# #), чтоб не было конфликтов с Fenom.
-
-Нужно создать страницы с alias: cart, search, favorites, auth, cabinet.
+Нужно создать страницы с такими alias: cart, search, favorites, auth, cabinet.
 
 В системных настройках в разделе effectshop задать id шаблонов товара и каталога, в основном разделе задать mail_to.
-На прототипе «Effect» tv mail_to сделать по аналогии с mail_from, чтоб туда подтягивалось значение с главной.
