@@ -69,7 +69,7 @@ switch ($modx->event->name) {
         break;
 }	
 ```
-заходим в корзину, инн автозаполнился с предыдущего заказа, но в shop_cart на сервере его ещё нет — добавляем
+Заходим в корзину, инн автозаполнился с предыдущего заказа, но в shop_cart на сервере его ещё нет — добавляем
 ```js
 document.addEventListener("shop-cart-load", function(e) {
 	if (ShopCartApp.$data.form.inn && !ShopCartApp.$data.cart.inn) {
