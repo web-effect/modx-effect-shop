@@ -19,14 +19,14 @@ TODO
 TODO добавить опции и подтовары, добавление в избранное
 ```html
 <form class="shop-item">
-	<input type="hidden" name="id" value="<$$i.id$>">
+	<input type="hidden" name="id" value="{$i.id}">
 
-	<$if $i.discount$>
-		<div class="">−<$$i.discount$>%</div>
-	<$/if$>
+	{if $i.discount}
+		<div class="">−{$i.discount}%</div>
+	{/if}
 
 	<!-- тут обновляется цена в зависимости от количества -->
-	<span data-price="<$$i.price$>"><$i.price$></span>
+	<span data-price="{$i.price}">{i.price}</span>
 
 	<!-- .shop-item-qty не обязателен, по умолчанию кол-во 1 -->
 	<div class="shop-item-qty">
@@ -56,38 +56,38 @@ prod_label — имя tv, в значенях которого м. б. action||n
 
 ## Получаем товары из подборки
 ```html
-<$set $catalog = '!shop'|snippet:[
+{set $catalog = '!shop'|snippet:[
 	'action' => 'getProducts',
 	'section' => 11,
 	'selections' => true,
 	'limit' => 99,
-]$>
-<$*$catalog|print*$>
+]}
+{*$catalog|print*}
 ```
 
 ## Раздел каталога
 ```html
-<$set:ignore $tpl$>
+{set:ignore $tpl}
 	<div class="grid shop-catalog-items"> 
-		<$foreach $rows as $key => $i$>
-			<$include 'shop-item'$>
-		<$/foreach$>
-		<$if !$total$>
+		{foreach $rows as $key => $i}
+			{include 'shop-item'}
+		{/foreach}
+		{if !$total}
 			<div class="grid-item is-full">
-				<$$pageType == 'favorites' ? 'В избранном нет товаров' : 'Ничего не найдено'$>
+				{$pageType == 'favorites' ? 'В избранном нет товаров' : 'Ничего не найдено'}
 			</div>
-		<$/if$>
+		{/if}
 	</div>
-<$/set$>
+{/set}
 
-<$set $catalog = '!shop'|snippet:[
+{set $catalog = '!shop'|snippet:[
 	'action' => 'getProducts',
 	'mode' => 'main',
 	'tpl' => $tpl,
 	'limit' => 12,
-]$>
+]}
 
-<$$catalog.html$>
+{$catalog.html}
 <div class="shop-catalog-app">
 	<div v-if="pages > 1" class="pagination-wrapper">
 		<button v-if="pages > page" @click="showMore()" class="button"><span>Показать ещё</span></button>
@@ -105,16 +105,16 @@ prod_label — имя tv, в значенях которого м. б. action||n
 ## Фильтр
 В фильтре автоматически выводятся tv товара с типом number, listbox, listbox-multiple, если заполнены
 ```html
-<$set $filters =  '!shop'|snippet:[
+{set $filters =  '!shop'|snippet:[
 	'action' => 'getFilters'
-]$>
-<div data-shop-filters='<$$filters|toJSON$>'></div>
+]}
+<div data-shop-filters='{$filters|toJSON}'></div>
 
 <div class="shop-catalog-app filter-wrapper">
 
 	<button @click="filterVisible = !filterVisible || false" class="filter-toggle" :class="{ 'is-active': filterVisible}">
 	    Фильтр
-	    <$"/assets/web/fa/solid/chevron-down.svg"|svg$>
+	    {"/assets/web/fa/solid/chevron-down.svg"|svg}
     </button>
 
 	<div class="filter" :class="{ 'is-visible': filterVisible}">
