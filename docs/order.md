@@ -72,7 +72,7 @@
 	<p v-if="error" class="form-error">(# error #)</p>
 
 	<div class="form__privacy">
-		Отправляя данные через форму, я соглашаюсь с <a class="link-nocolor" target="_blank" href="<$9|url$>">Политикой компании по обработке персональных данных</a>
+		Отправляя данные через форму, я соглашаюсь с <a class="link-nocolor" target="_blank" href="/privacy">Политикой компании по обработке персональных данных</a>
 	</div>
 
 </form>
